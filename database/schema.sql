@@ -23,7 +23,7 @@ CREATE TABLE tasks (
     startDate TIMESTAMP,
     endDate TIMESTAMP,
     status VARCHAR(255),
-    priority VARCHAR(255),
+    priority VARCHAR(255)
 );
 
 CREATE TABLE reminders (
