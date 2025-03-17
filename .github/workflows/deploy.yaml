@@ -8,6 +8,7 @@ on:
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
+    environment: CI/CD
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -46,6 +47,7 @@ jobs:
   deploy:
     needs: build_and_push
     runs-on: ubuntu-latest
+    environment: CI/CD
     steps:
       - name: Deploy via SSH
         env:
