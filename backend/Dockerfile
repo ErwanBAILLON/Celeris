@@ -8,7 +8,7 @@
 # USER node
 # CMD ["node", "dist/main.js"]
 
-# Étape 1 : Construction de l’application Next.js
+# Étape 1 : Construction de l'application Next.js
 FROM node:23-alpine AS builder
 WORKDIR /app
 
@@ -20,7 +20,7 @@ COPY . .
 
 RUN npm run build
 
-# Étape 2 : Image finale pour l’exécution en production
+# Étape 2 : Image finale pour l'exécution en production
 FROM node:23-alpine
 WORKDIR /app
 
@@ -30,6 +30,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/tsconfig.json ./
+COPY --from=builder /app/dist ./dist
 
 RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --production; fi
 
