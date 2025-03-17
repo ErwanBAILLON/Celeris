@@ -34,16 +34,6 @@ jobs:
           docker tag celeris-database:latest "${{ secrets.DOCKER_USERNAME }}/celeristest-database:latest"
           docker push "${{ secrets.DOCKER_USERNAME }}/celeristest-database:latest"
 
-      - name: Backup database
-        env:
-          DB_HOST: database
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          docker exec -t celeris-database pg_dumpall -c -U $DB_USER > db_backup.sql
-
   deploy:
     needs: build_and_push
     runs-on: ubuntu-latest
