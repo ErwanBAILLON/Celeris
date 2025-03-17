@@ -50,6 +50,9 @@ jobs:
             cd Celeris
             git pull origin main  
             docker compose -f docker-compose.prod.yml --env-file .env down
-            docker compose -f docker-compose.prod.yml --env-file .env pull
+            docker pull "${{ secrets.DOCKER_USERNAME }}/celeristest-backend:latest"
+            docker pull "${{ secrets.DOCKER_USERNAME }}/celeristest-frontend:latest"
+            docker pull "${{ secrets.DOCKER_USERNAME }}/celeristest-database:latest"
+            docker compose -f docker-compose.prod.yml --env-file .env build
             docker compose -f docker-compose.prod.yml --env-file .env up -d
           EOF
