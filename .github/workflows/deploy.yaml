@@ -1,4 +1,4 @@
-name: Deploy to Production with Backup
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,8 +6,7 @@ on:
       - CI/CD
 
 jobs:
-  deploy:
-    environment: CI/CD
+  build_and_push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -44,15 +43,19 @@ jobs:
         run: |
           docker exec -t celeris-database pg_dumpall -c -U $DB_USER > db_backup.sql
 
+  deploy:
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy via SSH
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
         run: |
-          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -p $SSH_PORT $SSH_USER@$SSH_HOST << 'EOF'
-            ls -la
+          sshpass -p $SSH_PASSWORD ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST << 'EOF'
+            cd Celeris
+            git pull origin main  
             docker-compose -f docker-compose.prod.yml down
             docker-compose -f docker-compose.prod.yml pull
             docker-compose -f docker-compose.prod.yml up -d

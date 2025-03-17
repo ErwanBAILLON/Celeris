@@ -1,6 +1,6 @@
 services:
   database:
-    image: ghcr.io/celeris/celeris-database:latest
+    image: ${DOCKER_USERNAME}/celeristest-database:latest
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -17,7 +17,7 @@ services:
       - default
 
   backend:
-    image: ghcr.io/celeris/celeris-backend:latest
+    image: ${DOCKER_USERNAME}/celeristest-backend:latest
     ports:
       - "${BACKEND_PORT}"
     environment:
@@ -36,7 +36,7 @@ services:
       - default
 
   frontend:
-    image: ghcr.io/celeris/celeris-frontend:latest
+    image: ${DOCKER_USERNAME}/celeristest-frontend:latest
     ports:
       - "${FRONTEND_PORT}:3000"
     depends_on:
