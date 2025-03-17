@@ -13,7 +13,7 @@ export class User {
     username: string;
 
     @Column({ name: "email", unique: true, type: 'varchar' })
-    walletAddress: string;
+    email: string;
 
     @Column({ name: "passwordHash", type: 'varchar' })
     passwordHash: string;

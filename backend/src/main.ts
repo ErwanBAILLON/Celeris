@@ -18,9 +18,9 @@ app.use('/', indexRouter);
 
 AppDataSource.initialize()
     .then(() => {
-        console.log('Connected to database');
+        console.log('[INIT] Connected to database');
         app.listen(port, () => {
-            console.log(`Server running on port ${port}`);
+            console.log(`[INIT] Server running on port ${port}`);
         });
     })
     .catch((err) => {
