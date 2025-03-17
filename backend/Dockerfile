@@ -30,6 +30,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/tsconfig.json ./
+COPY --from=builder /app/dist ./
 
 RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --production; fi
 

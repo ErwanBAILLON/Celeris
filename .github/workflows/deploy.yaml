@@ -1,0 +1,58 @@
+name: Deploy to Production with Backup
+
+on:
+  push:
+    branches:
+      - CI/CD
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and push backend image
+        run: |
+          docker build -t celeris-backend:latest -f backend/Dockerfile backend
+          docker tag celeris-backend:latest "${{ secrets.DOCKER_USERNAME }}/celeristest-backend:latest"
+          docker push "${{ secrets.DOCKER_USERNAME }}/celeristest-backend:latest"
+
+      - name: Build and push frontend image
+        run: |
+          docker build -t celeris-frontend:latest -f frontend/Dockerfile frontend
+          docker tag celeris-frontend:latest "${{ secrets.DOCKER_USERNAME }}/celeristest-frontend:latest"
+          docker push "${{ secrets.DOCKER_USERNAME }}/celeristest-frontend:latest"
+
+      - name: Build and push database image
+        run: |
+          docker build -t celeris-database:latest -f database/Dockerfile database
+          docker tag celeris-database:latest "${{ secrets.DOCKER_USERNAME }}/celeristest-database:latest"
+          docker push "${{ secrets.DOCKER_USERNAME }}/celeristest-database:latest"
+
+      - name: Backup database
+        env:
+          DB_HOST: database
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          docker exec -t celeris-database pg_dumpall -c -U $DB_USER > db_backup.sql
+
+      - name: Deploy via SSH
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+        run: |
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -p $SSH_PORT $SSH_USER@$SSH_HOST << 'EOF'
+            ls -la
+            docker-compose -f docker-compose.prod.yml down
+            docker-compose -f docker-compose.prod.yml pull
+            docker-compose -f docker-compose.prod.yml up -d
+          EOF
