@@ -131,6 +131,12 @@ Base url: `https://api.celeris.studio`
 
 - `GET /auth/refresh` - Refresh a user token
 
+> This route requires the refresh token to be sent in the request header.
+    - Request header:
+        ```
+        x-refresh-token: <refreshToken>
+        ```
+
     - Response:
         ```json
         {

@@ -14,14 +14,14 @@ export class Project {
     @Column({ name: "description", unique: true, type: 'text' })
     description: string;
 
-    @Column({ name: "startDate", type: 'timestamp' })
+    @Column({ name: "start_date", type: 'timestamp' })
     startDate: Date;
 
-    @Column({ name: "endDate", type: 'timestamp' })
+    @Column({ name: "end_date", type: 'timestamp' })
     endDate: Date;
 
-    @ManyToOne(() => User, (user) => user.tasks)
-    @JoinColumn({ name: 'ownerId' })
+    @ManyToOne(() => User, (user) => user.projects)
+    @JoinColumn({ name: 'owner_id' })
     user: User;
 
     @OneToMany(() => Reminder, (reminder) => reminder.project)

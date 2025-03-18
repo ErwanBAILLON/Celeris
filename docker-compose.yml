@@ -23,7 +23,7 @@ services:
       context: backend
       dockerfile: Dockerfile
     ports:
-      - "${BACKEND_PORT}"
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
     environment:
       DB_HOST: database
       DB_PORT: ${DB_PORT}
