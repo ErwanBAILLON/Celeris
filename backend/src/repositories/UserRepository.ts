@@ -10,22 +10,22 @@ export class UserRepository {
 
     static async findByUsername(username: string) : Promise<User | null> {
         return userRepository
-            .createQueryBuilder("user")
-            .where("user.username = :username", { username })
+            .createQueryBuilder("users")
+            .where("users.username = :username", { username })
             .getOne();
     }
 
     static async findByEmail(email: string) : Promise<User | null> {
         return userRepository
-            .createQueryBuilder("user")
-            .where("user.email = :email", { email })
+            .createQueryBuilder("users")
+            .where("users.email = :email", { email })
             .getOne();
     }
 
     static async findById(id: string) : Promise<User | null> {
         return userRepository
-            .createQueryBuilder("user")
-            .where("user.id = :id", { id })
+            .createQueryBuilder("users")
+            .where("users.id = :id", { id })
             .getOne();
     }
 }

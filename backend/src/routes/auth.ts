@@ -2,61 +2,60 @@ import express from 'express';
 import { User } from '../entities';
 import { UserRepository } from '../repositories';
 import { hashPassword, comparePasswords } from '../utils/hash';
-import { generateToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
-import { authMiddleware, refreshTokenMiddleware } from '../middlewares/authMiddleware';
+import { generateToken, generateRefreshToken } from '../utils/jwt';
+import { refreshTokenMiddleware } from '../middlewares/authMiddleware';
 
 const authRouter = express.Router();
 
 authRouter.post('/register', async (req, res) => {
-    // Handle user registration
-    const { username, email, password } = req.body;
-    if (!username || !password) {
-        res.status(400).json({ error: 'Username and password are required' });
-        return;
-    }
-    // Check if user already exists
-    UserRepository.findByUsername(username).then( existingUser => {
-        if (existingUser) {
+    try {
+        const { username, email, password } = req.body;
+
+        if (!username || !password) {
+            res.status(400).json({ error: 'Username and password are required' });
+            return;
+        }
+
+        // Check if user already exists by username
+        const existingUsernameUser = await UserRepository.findByUsername(username);
+        if (existingUsernameUser) {
             res.status(400).json({ error: 'This username already exists' });
             return;
         }
-    }).catch(err => {
-        console.error(err);
-        res.status(500).json({ error: 'Error while checking for existing user' });
-        return;
-    });
 
-    UserRepository.findByEmail(email).then(existingUser => {
-        if (existingUser) {
+        // Check if user already exists by email
+        const existingEmailUser = await UserRepository.findByEmail(email);
+        if (existingEmailUser) {
             res.status(400).json({ error: 'User with this email already exists' });
             return;
         }
-    }).catch(err => {
-        console.error(err);
-        res.status(500).json({ error: 'Error while checking for existing email' });
-        return;
-    });
 
-    const passwordHash = await hashPassword(password);
-    const newUser = new User();
-    newUser.username = username;
-    newUser.email = email;
-    newUser.passwordHash = passwordHash;
-    newUser.createdAt = new Date();
-    UserRepository.create(newUser).then(() => {
+        // Hash the password and create the new user
+        const passwordHash = await hashPassword(password);
+        const newUser = new User();
+        newUser.username = username;
+        newUser.email = email;
+        newUser.passwordHash = passwordHash;
+        newUser.createdAt = new Date();
+
+        // Save the user in the database
+        await UserRepository.create(newUser);
+
+        // Generate tokens and send the successful response
         const token = generateToken(newUser.id);
         const refreshToken = generateRefreshToken(newUser.id);
-        const response = {
+        res.status(201).json({
             name: newUser.username,
             accessToken: token,
             refreshToken: refreshToken,
-        }
+        });
         return;
-    }).catch(err => {
+
+    } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Error while saving the user in database' });
+        res.status(500).json({ error: 'Internal server error' });
         return;
-    });
+    }
 });
 
 authRouter.post('/login', async (req, res) => {
@@ -66,37 +65,28 @@ authRouter.post('/login', async (req, res) => {
         res.status(400).json({ error: 'Username and password are required' });
         return;
     }
-    UserRepository.findByUsername(username).then(user => {
-        if (!user) {
-            res.status(401).json({ error: 'Invalid username or password' });
-            return;
-        }
-        // Check password
-        comparePasswords(password, user.passwordHash).then(isMatch => {
-            if (!isMatch) {
-                res.status(401).json({ error: 'Invalid username or password' });
-                return;
-            }
-        }).catch(err => {
-            console.error(err);
-            res.status(500).json({ error: 'Error while comparing passwords' });
-            return;
-        });
-        // Generate tokens
-        const token = generateToken(user.id);
-        const refreshToken = generateRefreshToken(user.id);
-        const response = {
-            name: user.username,
-            accessToken: token,
-            refreshToken: refreshToken,
-        }
-        res.status(200).json(response);
+    // Check if user exists by username
+    const existingUser = await UserRepository.findByUsername(username);
+    if (!existingUser) {
+        res.status(401).json({ error: 'Invalid username or password' });
         return;
-    }).catch(err => {
-        console.error(err);
-        res.status(500).json({ error: 'Error while checking for existing user' });
+    }
+    // Check if password is correct
+    const passCompResult = await comparePasswords(password, existingUser.passwordHash);
+    if (!passCompResult) {
+        res.status(401).json({ error: 'Invalid username or password' });
         return;
-    });
+    }
+
+    const token = generateToken(existingUser.id);
+    const refreshToken = generateRefreshToken(existingUser.id);
+    const response = {
+        name: existingUser.username,
+        accessToken: token,
+        refreshToken: refreshToken,
+    }
+    res.status(200).json(response);
+    return;
 });
 
 authRouter.get('/refresh', refreshTokenMiddleware, async (req, res) => {
@@ -111,3 +101,5 @@ authRouter.get('/refresh', refreshTokenMiddleware, async (req, res) => {
     res.status(200).json(response);
     return;
 });
+
+export default authRouter;

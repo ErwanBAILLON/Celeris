@@ -4,12 +4,12 @@ import { AppDataSource } from './dataSource';
 import indexRouter from './routes/index';
 
 const app = express();
-const port = process.env.APP_PORT || 3000;
+const port = process.env.BACKEND_PORT || 3000;
 
 app.use(cors({
     origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"]
+    allowedHeaders: ["Content-Type", "Authorization", "x-refresh-token"],
 }));
 
 app.use(express.json());
