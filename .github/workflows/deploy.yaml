@@ -19,20 +19,20 @@ jobs:
       - name: Build and push backend image
         run: |
           docker build -t celeris-backend:latest -f backend/Dockerfile backend
-          docker tag celeris-backend:latest ghcr.io/celeris/celeris-backend:latest
-          docker push ghcr.io/celeris/celeris-backend:latest
+          # docker tag celeris-backend:latest ghcr.io/celeris/celeris-backend:latest
+          # docker push ghcr.io/celeris/celeris-backend:latest
 
       - name: Build and push frontend image
         run: |
           docker build -t celeris-frontend:latest -f frontend/Dockerfile frontend
-          docker tag celeris-frontend:latest ghcr.io/celeris/celeris-frontend:latest
-          docker push ghcr.io/celeris/celeris-frontend:latest
+          # docker tag celeris-frontend:latest ghcr.io/celeris/celeris-frontend:latest
+          # docker push ghcr.io/celeris/celeris-frontend:latest
 
       - name: Build and push database image
         run: |
           docker build -t celeris-database:latest -f database/Dockerfile database
-          docker tag celeris-database:latest ghcr.io/celeris/celeris-database:latest
-          docker push ghcr.io/celeris/celeris-database:latest
+          # docker tag celeris-database:latest ghcr.io/celeris/celeris-database:latest
+          # docker push ghcr.io/celeris/celeris-database:latest
 
   deploy:
     needs: build_and_push
@@ -49,7 +49,7 @@ jobs:
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -p $SSH_PORT $SSH_USER@$SSH_HOST << 'EOF'
             cd Celeris
             git pull origin main  
-            docker compose -f docker-compose.prod.yml --env-file .env build
-            docker compose -f docker-compose.prod.yml --env-file .env down
-            docker compose -f docker-compose.prod.yml --env-file .env up -d
+            docker compose -f docker-compose.yml --env-file .env build
+            docker compose -f docker-compose.yml --env-file .env down
+            docker compose -f docker-compose.yml --env-file .env up -d
           EOF
