@@ -20,7 +20,7 @@ export class Project {
     @Column({ name: "end_date", type: 'timestamp' })
     endDate: Date;
 
-    @ManyToOne(() => User, (user) => user.tasks)
+    @ManyToOne(() => User, (user) => user.projects)
     @JoinColumn({ name: 'owner_id' })
     user: User;
 
