@@ -4,7 +4,7 @@ import { Project } from './Project';
 import { Tag } from './Tag';
 import { Reminder } from './Reminder';
 
-@Entity('users')
+@Entity({ name:'users' })
 export class User {
     @PrimaryGeneratedColumn()
     id: number;
@@ -15,10 +15,10 @@ export class User {
     @Column({ name: "email", unique: true, type: 'varchar' })
     email: string;
 
-    @Column({ name: "passwordHash", type: 'varchar' })
+    @Column({ name: "password_hash", type: 'varchar' })
     passwordHash: string;
 
-    @Column({ name: "createdAt", type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ name: "created_at", type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
 
     @OneToMany(() => Task, (task) => task.user)
