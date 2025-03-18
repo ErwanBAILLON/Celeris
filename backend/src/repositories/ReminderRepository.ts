@@ -23,6 +23,14 @@ export class ReminderRepository {
             .getOne();
     }
 
+    static async findByUserId(userId: number): Promise<Reminder[]> {
+        return reminderRepository
+            .createQueryBuilder("reminder")
+            .innerJoinAndSelect("reminder.user", "user")
+            .where("user.id = :userId", { userId })
+            .getMany();
+    }
+
     static async findByTaskId(taskId: string): Promise<Reminder[]> {
         return reminderRepository
             .createQueryBuilder("reminder")

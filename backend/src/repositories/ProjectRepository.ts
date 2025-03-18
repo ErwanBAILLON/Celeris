@@ -23,7 +23,7 @@ export class ProjectRepository {
             .getOne();
     }
 
-    static async findByUserId(userId: string): Promise<Project[]> {
+    static async findByUserId(userId: number): Promise<Project[]> {
         return projectRepository
             .createQueryBuilder("project")
             .innerJoinAndSelect("project.users", "user")

@@ -22,7 +22,7 @@ export class UserRepository {
             .getOne();
     }
 
-    static async findById(id: string) : Promise<User | null> {
+    static async findById(id: number) : Promise<User | null> {
         return userRepository
             .createQueryBuilder("users")
             .where("users.id = :id", { id })
