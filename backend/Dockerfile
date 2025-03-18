@@ -1,14 +1,4 @@
-# FROM node:slim
 
-# WORKDIR /usr/src/app
-# COPY package*.json ./
-# RUN npm install --omit=dev
-# COPY . .
-# RUN npm run build
-# USER node
-# CMD ["node", "dist/main.js"]
-
-# Étape 1 : Construction de l'application Next.js
 FROM node:23-alpine AS builder
 WORKDIR /app
 
@@ -19,8 +9,6 @@ RUN npm ci
 COPY . .
 
 RUN npm run build
-
-# Étape 2 : Image finale pour l'exécution en production
 FROM node:23-alpine
 WORKDIR /app
 
