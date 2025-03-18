@@ -2,35 +2,35 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    passwordHash VARCHAR(255) NOT NULL,
-    createdAt TIMESTAMP DEFAULT NOW()
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE projects (
     id SERIAL PRIMARY KEY,
-    ownerId INTEGER REFERENCES users(id),
+    owner_id INTEGER REFERENCES users(id),
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    startDate TIMESTAMP,
-    endDate TIMESTAMP
+    start_date TIMESTAMP,
+    end_date TIMESTAMP
 );
 
 CREATE TABLE tasks (
     id SERIAL PRIMARY KEY,
-    projectId INTEGER REFERENCES projects(id),
+    project_id INTEGER REFERENCES projects(id),
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    startDate TIMESTAMP,
-    endDate TIMESTAMP,
+    start_date TIMESTAMP,
+    end_date TIMESTAMP,
     status VARCHAR(255),
-    priority VARCHAR(255),
+    priority VARCHAR(255)
 );
 
 CREATE TABLE reminders (
     id SERIAL PRIMARY KEY,
-    ownerId INTEGER REFERENCES users(id),
-    taskId INTEGER REFERENCES tasks(id),
-    projectId INTEGER REFERENCES projects(id),
+    owner_id INTEGER REFERENCES users(id),
+    task_id INTEGER REFERENCES tasks(id),
+    project_id INTEGER REFERENCES projects(id),
     name VARCHAR(255) NOT NULL,
     description TEXT,
     dateTime TIMESTAMP,
@@ -39,14 +39,14 @@ CREATE TABLE reminders (
 
 CREATE TABLE tags (
     id SERIAL PRIMARY KEY,
-    ownerId INTEGER REFERENCES users(id),
+    owner_id INTEGER REFERENCES users(id),
     name VARCHAR(255) NOT NULL,
     color VARCHAR(7) NOT NULL,
     description TEXT
 );
 
 CREATE TABLE tasks_tags (
-    taskId INTEGER REFERENCES tasks(id),
-    tagId INTEGER REFERENCES tags(id),
-    PRIMARY KEY (taskId, tagId)
+    task_id INTEGER REFERENCES tasks(id),
+    tag_id INTEGER REFERENCES tags(id),
+    PRIMARY KEY (task_id, tag_id)
 );

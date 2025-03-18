@@ -17,6 +17,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.9",
     "typescript": "^5.8.2"
   },
   "dependencies": {
@@ -24,6 +25,7 @@
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
+    "pg": "^8.14.0",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.21"
   }

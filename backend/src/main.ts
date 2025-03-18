@@ -4,12 +4,12 @@ import { AppDataSource } from './dataSource';
 import indexRouter from './routes/index';
 
 const app = express();
-const port = process.env.APP_PORT || 3000;
+const port = process.env.BACKEND_PORT || 3000;
 
 app.use(cors({
     origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"]
+    allowedHeaders: ["Content-Type", "Authorization", "x-refresh-token"],
 }));
 
 app.use(express.json());
@@ -18,9 +18,9 @@ app.use('/', indexRouter);
 
 AppDataSource.initialize()
     .then(() => {
-        console.log('Connected to database');
+        console.log('[INIT] Connected to database');
         app.listen(port, () => {
-            console.log(`Server running on port ${port}`);
+            console.log(`[INIT] Server running on port ${port}`);
         });
     })
     .catch((err) => {

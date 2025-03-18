@@ -17,18 +17,18 @@ export class Reminder {
     @Column({ name: "status", unique: true, type: 'text' })
     status: string;
 
-    @Column({ name: "dateTime", type: 'timestamp' })
+    @Column({ name: "date_time", type: 'timestamp' })
     dateTime: Date;
 
     @ManyToOne(() => User, (user) => user.tasks)
-    @JoinColumn({ name: 'ownerId' })
+    @JoinColumn({ name: 'owner_id' })
     user: User;
 
     @ManyToOne(() => Task, (task) => task.reminders)
-    @JoinColumn({ name: 'taskId' })
+    @JoinColumn({ name: 'task_id' })
     task: Task;
 
     @ManyToOne(() => Project, (project) => project.reminders)
-    @JoinColumn({ name: 'projectId' })
+    @JoinColumn({ name: 'project_id' })
     project: Project;
 }

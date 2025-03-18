@@ -17,7 +17,7 @@ export class Tag {
     color: string;
 
     @ManyToOne(() => User, (user) => user.tags)
-    @JoinColumn({ name: 'ownerId' })
+    @JoinColumn({ name: 'owner_id' })
     user: User;
 
     @ManyToMany(() => Task, (task) => task.tags)

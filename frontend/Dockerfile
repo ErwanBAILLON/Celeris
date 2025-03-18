@@ -6,4 +6,4 @@ RUN npm install --omit=dev
 COPY . .
 RUN npm run build
 USER node
-CMD ["node", "dist/index.js"]
+CMD ["npm", "start"]
