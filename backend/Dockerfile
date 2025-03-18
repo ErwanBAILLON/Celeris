@@ -36,6 +36,4 @@ RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --prod
 
 USER appuser
 
-EXPOSE 3000
-
 CMD ["npm", "start"]
