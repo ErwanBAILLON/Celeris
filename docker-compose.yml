@@ -4,6 +4,7 @@ services:
       context: database
       dockerfile: Dockerfile
     restart: unless-stopped
+    container_name: Celeris-postgres
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -26,6 +27,7 @@ services:
     ports:
       - "127.0.0.1:${BACKEND_PORT}:${BACKEND_PORT}"
     restart: unless-stopped
+    container_name: Celeris-backend
     environment:
       DB_HOST: database
       DB_PORT: ${DB_PORT}
@@ -46,6 +48,7 @@ services:
       context: frontend
       dockerfile: Dockerfile
     restart: unless-stopped
+    container_name: Celeris-frontend
     ports:
       - "127.0.0.1:${FRONTEND_PORT}:3000"
     depends_on:
