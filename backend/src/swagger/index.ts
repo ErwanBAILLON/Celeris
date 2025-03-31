@@ -7,7 +7,7 @@ export = {
   info: {
     title: 'Celeris API',
     version: '1.0.0',
-    description: 'API documentation for the Metallix platform',
+    description: 'API documentation for the Celeris platform',
   },
   servers: [
     {
@@ -32,5 +32,9 @@ export = {
       }
     }
   },
-  tags: [],
+  tags: [
+    { name: 'Auth', description: 'Authentication and authorization' },
+    { name: 'Projects', description: 'Project management' },
+    { name: 'Reminders', description: 'Reminder management' },
+  ],
 };
