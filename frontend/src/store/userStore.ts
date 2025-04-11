@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { indexedDBStorage } from './indexedDBStorage';
 
 type User = {
   name: string;
@@ -20,8 +21,8 @@ export const useUserStore = create<UserStore>()(
       clearUser: () => set({ user: { name: '', email: '' } }),
     }),
     {
-      name: 'user-store',
-      partialize: (state) => ({ user: state.user }),
+      name: 'zustand-user-storage',
+      storage: createJSONStorage(() => indexedDBStorage),
     }
   )
 );
