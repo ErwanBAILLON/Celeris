@@ -1,15 +1,9 @@
 import React from "react";
-import { Colors } from "../../utils/colors"
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../store/store";
-import { login, logout } from "../../slice/authSlice";
+import { Colors } from "../../utils/colors";
 
 const Login = () => {
 
   const [error, setError] = React.useState<string | null>(null);
-
-  const dispatch = useDispatch();
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

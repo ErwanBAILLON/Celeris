@@ -1,22 +1,17 @@
-import { useGetUsersQuery } from "../../slice/apiSlice";
+import { useUserStore } from '../../store/userStore';
 
 const Home = () => {
 
-  const { data, error, isLoading } = useGetUsersQuery();
-
-  if (isLoading) return <p>Loading...</p>;
-  if (error) return <p className="text-red-500">Error loading users</p>;
+  const { user, setUser, clearUser } = useUserStore();
 
   return (
     <div className="p-5">
-      <h2 className="text-xl font-bold">Users</h2>
-      <ul className="mt-3">
-        {data?.map((user) => (
-          <li key={user.id} className="p-2 border-b border-gray-300">
-            {user.name}
-          </li>
-        ))}
-      </ul>
+      <p>Nom : {user.name}</p>
+      <p>Email : {user.email}</p>
+      <button onClick={() => setUser({ name: 'Alice', email: 'alice@mail.com' })}>
+        Se connecter
+      </button>
+      <button onClick={clearUser}>Déconnexion</button>
     </div>
   );
 }
