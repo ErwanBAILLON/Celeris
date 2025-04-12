@@ -1,24 +1,39 @@
 import React from "react";
 import { Colors } from "../../utils/colors";
 import { Link } from "react-router-dom";
+import { useUserStore } from "../../store/userStore";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
 
   const [error, setError] = React.useState<string | null>(null);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const register = useUserStore((state) => state.register);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const email = (e.currentTarget[0] as HTMLInputElement).value;
-    const username = (e.currentTarget[1] as HTMLInputElement).value;
+    const name = (e.currentTarget[1] as HTMLInputElement).value;
     const password = (e.currentTarget[2] as HTMLInputElement).value;
 
-    if (!email || !username || !password) {
+    if (!email || !name || !password) {
       setError("Please fill all fields");
       return;
     }
 
     // Add your register logic here
+    const userData = { name, password, email };
+    console.log("Registering user:", userData);
+    try {
+      await register(userData);
+      console.log("User registered successfully");
+      navigate("/home");
+    } catch (error) {
+      console.error("Registration error:", error);
+      setError("Registration failed. Please try again.");
+    }
   }
 
   return (
