@@ -14,6 +14,11 @@ app.use(cors({
 
 app.use(express.json());
 
+// Swagger
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './swagger';
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 app.use('/', indexRouter);
 
 AppDataSource.initialize()
