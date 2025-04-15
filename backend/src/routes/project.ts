@@ -1,5 +1,5 @@
 import express from 'express';
-import { User, Project, Task } from '../entities';
+import { Project, Task } from '../entities';
 import { ProjectRepository, UserRepository, TaskRepository } from '../repositories';
 import { authMiddleware } from '../middlewares/authMiddleware';
 
