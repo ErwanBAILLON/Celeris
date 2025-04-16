@@ -1,6 +1,6 @@
 {
   "name": "celeris",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "dependencies": {
     "@reduxjs/toolkit": "^2.6.1",
@@ -25,10 +25,11 @@
     "zustand": "^5.0.3"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "DISABLE_ESLINT_PLUGIN=true react-scripts start",
     "dev": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "build-sw": "workbox generateSW workbox-config.js",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -48,5 +49,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "workbox-cli": "^7.3.0"
   }
 }
