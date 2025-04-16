@@ -4,8 +4,10 @@ import { UserRepository } from '../repositories';
 import { hashPassword, comparePasswords } from '../utils/hash';
 import { generateToken, generateRefreshToken } from '../utils/jwt';
 import { refreshTokenMiddleware } from '../middlewares/authMiddleware';
+import { Mailer } from '../utils/mailling';
 
 const authRouter = express.Router();
+const mailling = new Mailer();
 
 authRouter.post('/register', async (req, res) => {
     try {
@@ -44,6 +46,12 @@ authRouter.post('/register', async (req, res) => {
         // Generate tokens and send the successful response
         const token = generateToken(newUser.id);
         const refreshToken = generateRefreshToken(newUser.id);
+        // Send welcome email
+        try {
+            await mailling.sendLoginEmail(email, username);
+        } catch (emailError) {
+            console.error('Failed to send welcome email:', emailError);
+        }
         res.status(201).json({
             name: newUser.username,
             accessToken: token,

@@ -26,7 +26,7 @@ export class ProjectRepository {
     static async findByUserId(userId: number): Promise<Project[]> {
         return projectRepository
             .createQueryBuilder("project")
-            .innerJoinAndSelect("project.users", "user")
+            .innerJoinAndSelect("project.user", "user")
             .where("user.id = :userId", { userId })
             .getMany();
     }

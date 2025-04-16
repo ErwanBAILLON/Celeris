@@ -16,11 +16,9 @@ declare global {
 // Mandatory authentication middleware
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     try {
-        console.log('Auth headers:', req.headers.authorization);
         const token = req.headers.authorization?.split(' ')[1];
 
         if (!token) {
-            console.log('No token provided');
             res.status(401).json({ message: 'Authentication required' });
             return;
         }

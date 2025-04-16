@@ -36,6 +36,10 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       BACKEND_PORT: ${BACKEND_PORT}
       JWT_SECRET: ${JWT_SECRET}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
     depends_on:
       database:
         condition: service_healthy
