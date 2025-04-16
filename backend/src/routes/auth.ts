@@ -47,7 +47,11 @@ authRouter.post('/register', async (req, res) => {
         const token = generateToken(newUser.id);
         const refreshToken = generateRefreshToken(newUser.id);
         // Send welcome email
-        mailling.sendLoginEmail(email, username)
+        try {
+            await mailling.sendLoginEmail(email, username);
+        } catch (emailError) {
+            console.error('Failed to send welcome email:', emailError);
+        }
         res.status(201).json({
             name: newUser.username,
             accessToken: token,
