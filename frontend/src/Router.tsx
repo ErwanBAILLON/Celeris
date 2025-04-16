@@ -4,11 +4,13 @@ import NotFound from './pages/NotFound/NotFound';
 import Login from './pages/Login/Login';
 import Register from './pages/Register/Register';
 import NotificationPermission from './components/NotificationPermission';
+import NetworkStatusNotification from './components/NetworkStatusNotification';
 
 const AppContent = () => {
   return (
     <>
       <NotificationPermission />
+      <NetworkStatusNotification />
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />

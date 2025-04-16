@@ -15,7 +15,7 @@ const NotificationPermission = () => {
           if (Notification.permission === 'granted') {
             new Notification('Nouvelle version disponible', {
               body: 'Rechargez la page pour appliquer les changements.',
-              icon: '/icon.png', // Remplacez par le chemin de votre icône
+              icon: '/icon.png',
             });
           } else {
             alert('Une nouvelle version est disponible. Rechargez la page pour appliquer les changements.');
