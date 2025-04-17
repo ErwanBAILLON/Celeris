@@ -38,5 +38,39 @@ module.exports = {
         },
       },
     },
+    {
+      urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'api-requests',
+        expiration: {
+          maxEntries: 20,
+          maxAgeSeconds: 24 * 60 * 60, // 1 jour
+        },
+        backgroundSync: {
+          name: 'api-queue',
+          options: {
+            maxRetentionTime: 24 * 60, // 24 heures
+          },
+        },
+      },
+    },
+    {
+      urlPattern: new RegExp('/(auth|projects|tasks|reminders)/'),
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'api-requests',
+        expiration: {
+          maxEntries: 20,
+          maxAgeSeconds: 24 * 60 * 60, // 1 jour
+        },
+        backgroundSync: {
+          name: 'api-queue',
+          options: {
+            maxRetentionTime: 24 * 60, // 24 heures
+          },
+        },
+      },
+    },
   ],
 };

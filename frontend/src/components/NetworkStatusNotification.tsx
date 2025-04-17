@@ -15,7 +15,16 @@ const NetworkStatusNotification = () => {
       }
     };
 
-    const handleOnline = () => notify('en ligne');
+    const handleOnline = () => {
+      notify('en ligne');
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'SYNC_REQUESTS',
+          route: 'reminders',
+        });
+      }
+    };
+
     const handleOffline = () => notify('hors ligne');
 
     window.addEventListener('online', handleOnline);
