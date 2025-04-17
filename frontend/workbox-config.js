@@ -16,7 +16,7 @@ module.exports = {
         cacheName: 'images-cache',
         expiration: {
           maxEntries: 50,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 jours
+          maxAgeSeconds: 30 * 24 * 60 * 60,
         },
       },
     },
@@ -25,6 +25,17 @@ module.exports = {
       handler: 'StaleWhileRevalidate',
       options: {
         cacheName: 'static-resources',
+      },
+    },
+    {
+      urlPattern: new RegExp('/auth/(register|login|logout)'),
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'api-cache',
+        expiration: {
+           maxEntries: 10,
+           maxAgeSeconds: 5 * 60,
+        },
       },
     },
   ],

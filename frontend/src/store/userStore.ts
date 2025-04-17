@@ -1,18 +1,17 @@
-// store/userStore.ts
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { indexedDBStorage } from './indexedDBStorage';
 import UserService from '../services/user/userService';
 
 type User = {
-  name: string;
+  username: string;
   email?: string;
   accessToken?: string;
   refreshToken?: string;
 };
 
 export type UserData = {
-  name: string;
+  username: string;
   email: string;
   password: string;
 };
@@ -24,12 +23,12 @@ type UserResponse = {
 }
 
 type Credentials = {
-  name: string;
+  username: string;
   password: string;
 };
 
 type RegistrationData = {
-  name: string;
+  username: string;
   password: string;
   email: string;
 };
@@ -46,11 +45,11 @@ type UserStore = {
 export const useUserStore = create<UserStore>()(
   persist(
     (set) => ({
-      user: { name: '', email: '' },
+      user: { username: '', email: '' },
 
       setUser: (user) => set({ user }),
 
-      clearUser: () => set({ user: { name: '', email: '' } }),
+      clearUser: () => set({ user: { username: '', email: '' } }),
 
       login: async (credentials) => {
         try {
@@ -58,7 +57,7 @@ export const useUserStore = create<UserStore>()(
           if (!data) {
             throw new Error('Login failed');
           }
-          set({ user: { name: data.name, accessToken: data.accessToken, refreshToken: data.refreshToken } });
+          set({ user: { username: data.name, accessToken: data.accessToken, refreshToken: data.refreshToken } });
         } catch (error) {
           console.error('Login failed:', error);
           throw error;
@@ -71,8 +70,9 @@ export const useUserStore = create<UserStore>()(
           if (!data) {
             throw new Error('Registration failed');
           }
-          await UserService.login({ name: userData.name, password: userData.password });
-          set({ user: { name: data.name, accessToken: data.accessToken, refreshToken: data.refreshToken } });
+          await UserService.login({ username: userData.username, password: userData.password });
+          console.log('User data:', data);
+          set({ user: { username: data.name, accessToken: data.accessToken, refreshToken: data.refreshToken } });
         } catch (error) {
           console.error('Registration failed:', error);
           throw error;
@@ -92,7 +92,7 @@ export const useUserStore = create<UserStore>()(
             }
 
             await UserService.logout();
-            set({ user: { name: '', email: '', accessToken: '', refreshToken: '' } });
+            set({ user: { username: '', email: '', accessToken: '', refreshToken: '' } });
           } catch (error) {
             console.error('Logout failed:', error);
             throw error;
@@ -101,7 +101,7 @@ export const useUserStore = create<UserStore>()(
     }),
     {
       name: 'zustand-user-storage',
-      storage: createJSONStorage(() => indexedDBStorage),
+      storage: createJSONStorage<UserStore>(() => indexedDBStorage),
     }
   )
 );
