@@ -14,3 +14,11 @@ root.render(
 );
 
 register();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'NEW_VERSION_AVAILABLE') {
+      alert('Une nouvelle version du site est disponible. Rechargez la page pour voir les changements.');
+    }
+  });
+}

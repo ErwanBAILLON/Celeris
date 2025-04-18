@@ -24,7 +24,7 @@ const Register = () => {
     }
 
     // Add your register logic here
-    const userData = { name, password, email };
+    const userData = { username: name, password, email };
     console.log("Registering user:", userData);
     try {
       await register(userData);

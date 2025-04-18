@@ -3,7 +3,7 @@ import { Routes } from '../../utils/routes';
 
 class UserService {
 
-  async register(userData: { name: string; password: string; email: string }) {
+  async register(userData: { username: string; password: string; email: string }) {
     try {
       const response = await axios.post(Routes.REGISTER, userData);
       return response.data;
@@ -13,7 +13,7 @@ class UserService {
     }
   }
 
-  async login(credentials: { name: string; password: string }) {
+  async login(credentials: { username: string; password: string }) {
     try {
       const response = await axios.post(Routes.LOGIN, credentials);
       return response.data;

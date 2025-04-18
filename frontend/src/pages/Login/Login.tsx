@@ -1,23 +1,37 @@
 import React from "react";
 import { Colors } from "../../utils/colors";
 import { Link } from "react-router-dom";
+import { useUserStore } from "../../store/userStore";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
 
   const [error, setError] = React.useState<string | null>(null);
+  const navigate = useNavigate();
+  const login = useUserStore((state) => state.login);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const email = (e.currentTarget[0] as HTMLInputElement).value;
+    const username = (e.currentTarget[0] as HTMLInputElement).value;
     const password = (e.currentTarget[1] as HTMLInputElement).value;
 
-    if (!email || !password) {
+    if (!username || !password) {
       setError("Please fill all fields");
       return;
     }
 
     // Add your login logic here
+    const userData = { username, password };
+    console.log("Logging in user:", userData);
+    try {
+      login({ username, password });
+      console.log("User logged in successfully");
+      navigate("/home");
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("Login failed. Please try again.");
+    }
   }
 
   return (
@@ -26,8 +40,8 @@ const Login = () => {
         <h1 className="text-2xl font-bold text-center mb-5">Login</h1>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
-            type="email"
-            placeholder="Email"
+            type="text"
+            placeholder="Username"
             className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
@@ -47,6 +61,5 @@ const Login = () => {
     </div>
   );
 };
-
 
 export default Login;
