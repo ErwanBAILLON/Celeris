@@ -6,9 +6,9 @@ const Home = () => {
 
   return (
     <div className="p-5">
-      <p>Nom : {user.name}</p>
+      <p>Nom : {user.username}</p>
       <p>Email : {user.email}</p>
-      <button onClick={() => setUser({ name: 'Alice', email: 'alice@mail.com' })}>
+      <button onClick={() => setUser({ username: 'Alice', email: 'alice@mail.com' })}>
         Se connecter
       </button>
       <button onClick={clearUser}>Déconnexion</button>
