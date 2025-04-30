@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getProjectById, ProjectDetail } from '../services/project/projectService';
-import { getTasks, createTask, deleteTask, Task } from '../services/task/taskService';
+import { getTasks, createTask, deleteTask, updateTask, Task } from '../services/task/taskService';
 import { useUserStore } from '../store/userStore';
 
 const ProjectDetailPage: React.FC = () => {
@@ -21,6 +21,8 @@ const ProjectDetailPage: React.FC = () => {
   const [endDate, setEndDate] = useState('');
   const [status, setStatus] = useState('in progress');
   const [priority, setPriority] = useState('medium');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const token = useUserStore(s => s.user.accessToken);
 
   const handleOpenModal = () => setShowModal(true);
@@ -38,6 +40,39 @@ const ProjectDetailPage: React.FC = () => {
       token
     );
     setTasks(prev => [...prev, newTask]);
+    handleCloseModal();
+  };
+
+  const openEditModal = (task: Task) => {
+    setEditingTask(task);
+    setName(task.name);
+    setDescription(task.description);
+    setStartDate(task.startDate.slice(0,16));
+    setEndDate(task.endDate.slice(0,16));
+    setStatus(task.status);
+    setPriority(task.priority);
+    setIsEditing(true);
+    setShowModal(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id || !token) return;
+    const payload = {
+      name, description,
+      startDate: new Date(startDate).toISOString(),
+      endDate: new Date(endDate).toISOString(),
+      status, priority
+    };
+    if (isEditing && editingTask) {
+      const updated = await updateTask(id, editingTask.id, payload, token);
+      setTasks(prev => prev.map(t => t.id === updated.id ? updated : t));
+    } else {
+      const newTask = await createTask(id, payload, token);
+      setTasks(prev => [...prev, newTask]);
+    }
+    setIsEditing(false);
+    setEditingTask(null);
     handleCloseModal();
   };
 
@@ -101,7 +136,7 @@ const ProjectDetailPage: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <Link to="/projects" className="text-blue-600 hover:underline mb-4 inline-block">
+      <Link to="/home" className="text-blue-600 hover:underline mb-4 inline-block">
         &larr; Back to projects
       </Link>
       <h1 className="text-3xl font-bold mb-2">{project.name}</h1>
@@ -120,11 +155,14 @@ const ProjectDetailPage: React.FC = () => {
           </button>
         </div>
 
+        {/* Modal (en création ou édition) */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-lg w-full max-w-md">
-              <h3 className="text-xl font-semibold mb-4">New Task</h3>
-              <form onSubmit={handleCreateTask} className="space-y-3">
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg w-full max-w-md z-60">
+              <h3 className="text-xl font-semibold mb-4">
+                {isEditing ? 'Edit Task' : 'New Task'}
+              </h3>
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <input
                   type="text" placeholder="Name"
                   value={name} onChange={e => setName(e.target.value)}
@@ -179,7 +217,7 @@ const ProjectDetailPage: React.FC = () => {
                 <div className="flex justify-end gap-2 mt-4">
                   <button
                     type="button"
-                    onClick={handleCloseModal}
+                    onClick={() => { setIsEditing(false); setEditingTask(null); handleCloseModal(); }}
                     className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
                   >
                     Cancel
@@ -188,7 +226,7 @@ const ProjectDetailPage: React.FC = () => {
                     type="submit"
                     className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                   >
-                    Create
+                    {isEditing ? 'Update' : 'Create'}
                   </button>
                 </div>
               </form>
@@ -205,10 +243,7 @@ const ProjectDetailPage: React.FC = () => {
             <div key={day} className="bg-white shadow rounded-lg overflow-hidden">
               <div className="bg-blue-600 text-white px-4 py-2">
                 {new Date(day).toLocaleDateString(undefined, {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
+                  weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
                 })}
               </div>
               <div className="p-4 space-y-4">
@@ -233,12 +268,21 @@ const ProjectDetailPage: React.FC = () => {
 
                   return (
                     <div key={task.id} className="relative border p-3 rounded">
-                      <button
-                        onClick={() => handleDeleteTask(task.id)}
-                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                      >
-                        Delete
-                      </button>
+                      {/* actions */}
+                      <div className="absolute top-2 right-2 flex space-x-2 z-10">
+                        <button
+                          onClick={() => openEditModal(task)}
+                          className="text-blue-500 hover:text-blue-700 text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTask(task.id)}
+                          className="text-red-500 hover:text-red-700 text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
                       <p className="font-semibold text-gray-800">{task.name}</p>
                       <p className="text-sm text-gray-600">Date de fin : {fullEndDate}</p>
                       <p className="text-sm text-gray-600 mb-1">Horaires : de {startTime} à {endTime}</p>

@@ -13,7 +13,7 @@ export class TaskRepository {
     }
 
     static async delete(task: Task): Promise<void> {
-        await taskRepository.remove(task);
+        await taskRepository.delete(task);
     }
 
     static async findById(id: string): Promise<Task | null> {

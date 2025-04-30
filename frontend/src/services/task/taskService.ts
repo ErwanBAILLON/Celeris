@@ -41,6 +41,26 @@ export const createTask = async (
   return resp.data;
 };
 
+export const updateTask = async (
+  projectId: string,
+  taskId: string,
+  taskData: {
+    name: string;
+    description: string;
+    startDate: string;
+    endDate: string;
+    status: string;
+    priority: string;
+  },
+  token: string
+): Promise<Task> => {
+  const url = `${Routes.GET_PROJECT_BY_ID(projectId)}/tasks/${taskId}`;
+  const resp = await axios.put<Task>(url, taskData, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return resp.data;
+};
+
 export const deleteTask = async (
   projectId: string,
   taskId: string,

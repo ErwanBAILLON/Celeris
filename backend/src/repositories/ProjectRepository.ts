@@ -13,7 +13,7 @@ export class ProjectRepository {
     }
 
     static async delete(project: Project): Promise<void> {
-        await projectRepository.remove(project);
+        await projectRepository.delete(project);
     }
 
     static async findById(id: string): Promise<Project | null> {
