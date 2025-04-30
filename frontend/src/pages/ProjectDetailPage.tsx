@@ -81,6 +81,17 @@ const ProjectDetailPage: React.FC = () => {
     }
   };
 
+  const now = new Date();
+
+  // grouper tâches par date (YYYY-MM-DD)
+  const tasksByDate: Record<string, Task[]> = tasks
+    .filter(t => t.startDate)
+    .reduce((acc, t) => {
+      const day = new Date(t.startDate).toISOString().split('T')[0];
+      acc[day] = acc[day] ? [...acc[day], t] : [t];
+      return acc;
+    }, {} as Record<string, Task[]>);
+
   if (loading) {
     return <div className="flex justify-center items-center h-64">Loading...</div>;
   }
@@ -104,10 +115,7 @@ const ProjectDetailPage: React.FC = () => {
       <section>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-semibold">Tasks</h2>
-          <button
-            onClick={handleOpenModal}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          >
+          <button onClick={handleOpenModal} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
             + Add Task
           </button>
         </div>
@@ -187,27 +195,71 @@ const ProjectDetailPage: React.FC = () => {
             </div>
           </div>
         )}
+      </section>
 
-        {taskLoading
-          ? <p>Loading tasks...</p>
-          : (
-            <ul className="space-y-2">
-              {tasks.map(t => (
-                <li
-                  key={t.id}
-                  className="flex justify-between items-center p-3 bg-gray-50 rounded shadow-sm"
-                >
-                  <span>{t.name}</span>
-                  <button
-                    onClick={() => handleDeleteTask(t.id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Delete
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+      {/* Planning Section */}
+      <section className="mt-8">
+        <h2 className="text-2xl font-semibold mb-4">Planning</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Object.entries(tasksByDate).map(([day, dayTasks]) => (
+            <div key={day} className="bg-white shadow rounded-lg overflow-hidden">
+              <div className="bg-blue-600 text-white px-4 py-2">
+                {new Date(day).toLocaleDateString(undefined, {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </div>
+              <div className="p-4 space-y-4">
+                {dayTasks.map(task => {
+                  const s = new Date(task.startDate);
+                  const e = new Date(task.endDate);
+                  const startTime = s.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                  const endTime   = e.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                  const fullEndDate  = e.toLocaleDateString(undefined, {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  });
+                  const isOverdue    = e < now && task.status !== 'completed';
+                  const isInProgress = s <= now && now <= e;
+
+                  let priorityClass = 'bg-gray-200 text-gray-800';
+                  if (task.priority === 'high')   priorityClass = 'bg-red-200 text-red-800';
+                  if (task.priority === 'medium') priorityClass = 'bg-yellow-200 text-yellow-800';
+                  if (task.priority === 'low')    priorityClass = 'bg-green-200 text-green-800';
+
+                  return (
+                    <div key={task.id} className="relative border p-3 rounded">
+                      <button
+                        onClick={() => handleDeleteTask(task.id)}
+                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                      >
+                        Delete
+                      </button>
+                      <p className="font-semibold text-gray-800">{task.name}</p>
+                      <p className="text-sm text-gray-600">Date de fin : {fullEndDate}</p>
+                      <p className="text-sm text-gray-600 mb-1">Horaires : de {startTime} à {endTime}</p>
+                      <p className="text-sm text-gray-700 mb-2">{task.description}</p>
+                      <div className="flex flex-wrap items-center gap-2 text-xs">
+                        <span className={`px-2 py-1 rounded ${priorityClass}`}>{task.priority}</span>
+                        <span className="px-2 py-1 rounded bg-blue-200 text-blue-800">{task.status}</span>
+                        {isInProgress && (
+                          <span className="px-2 py-1 rounded bg-green-200 text-green-800">En cours</span>
+                        )}
+                        {isOverdue && (
+                          <span className="px-2 py-1 rounded bg-red-200 text-red-800">Dépassé</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );
