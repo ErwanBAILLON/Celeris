@@ -26,7 +26,7 @@ export class TaskRepository {
     static async findByProjectId(projectId: string): Promise<Task[]> {
         return taskRepository
             .createQueryBuilder("task")
-            .where("task.projectId = :projectId", { projectId })
+            .where("task.project_id = :projectId", { projectId })
             .getMany();
     }
 }
