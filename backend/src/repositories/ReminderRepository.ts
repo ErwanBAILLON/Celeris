@@ -13,7 +13,11 @@ export class ReminderRepository {
     }
 
     static async delete(reminder: Reminder): Promise<void> {
-        await reminderRepository.remove(reminder);
+        const result = await reminderRepository.delete({ id: reminder.id });
+        if (result.affected === 0) {
+            console.error("Reminder was not deleted:", reminder.id);
+            throw new Error("Reminder was not deleted");
+        }
     }
 
     static async findById(id: string): Promise<Reminder | null> {

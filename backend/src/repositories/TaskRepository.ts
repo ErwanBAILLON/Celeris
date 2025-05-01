@@ -13,7 +13,11 @@ export class TaskRepository {
     }
 
     static async delete(task: Task): Promise<void> {
-        await taskRepository.remove(task);
+        const result = await taskRepository.delete({ id: task.id });
+        if (result.affected === 0) {
+            console.error("Task was not deleted:", task.id);
+            throw new Error("Task was not deleted");
+        }
     }
 
     static async findById(id: string): Promise<Task | null> {
@@ -26,7 +30,7 @@ export class TaskRepository {
     static async findByProjectId(projectId: string): Promise<Task[]> {
         return taskRepository
             .createQueryBuilder("task")
-            .where("task.projectId = :projectId", { projectId })
+            .where("task.project_id = :projectId", { projectId })
             .getMany();
     }
 }

@@ -6,6 +6,10 @@ import Register from './pages/Register/Register';
 import NotificationPermission from './components/NotificationPermission';
 import NetworkStatusNotification from './components/NetworkStatusNotification';
 import HomePage from './pages';
+import ProtectedRoute from './components/ProtectedRoute';
+import ProjectsPage from './pages/ProjectsPage';
+import NewProjectPage from './pages/NewProjectPage';
+import ProjectDetailPage from './pages/ProjectDetailPage';
 
 const AppContent = () => {
   return (
@@ -16,7 +20,31 @@ const AppContent = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/home" element={<Home />} />
+        {/* <Route path="/home" element={<Home />} /> */}
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <ProjectsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/new"
+          element={
+            <ProtectedRoute>
+              <NewProjectPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/:id"
+          element={
+            <ProtectedRoute>
+              <ProjectDetailPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
