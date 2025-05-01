@@ -1,15 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
 import { Routes } from '../utils/routes';
 import { useUserStore } from '../store/userStore';
-
-interface Reminder {
-  id: string;
-  title: string;
-  date: string;
-  completed?: boolean;
-}
+import { Reminder, getReminders, deleteReminder } from '../services/reminder/reminderService';
+import userService from '../services/user/userService';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -24,9 +18,8 @@ const Header: React.FC = () => {
   const handleLogout = async () => {
     try {
       if (user.accessToken) {
-        await axios.post(Routes.LOGOUT, {}, {
-          headers: { Authorization: `Bearer ${user.accessToken}` }
-        });
+        // Utiliser le service utilisateur au lieu d'axios directement
+        await userService.logout();
       }
     } catch (e) {
       console.error('Logout error', e);
@@ -36,16 +29,15 @@ const Header: React.FC = () => {
     }
   };
 
-  // Ajouter une fonction pour supprimer un rappel
+  // Ajouter une fonction pour supprimer un rappel qui utilise le service
   const handleDeleteReminder = async (id: string, event: React.MouseEvent) => {
     event.stopPropagation(); // Empêcher le click de se propager
     
     if (!user.accessToken) return;
     
     try {
-      await axios.delete(`${Routes.DELETE_REMINDER(id)}`, {
-        headers: { Authorization: `Bearer ${user.accessToken}` }
-      });
+      // Utiliser le service au lieu d'axios directement
+      await deleteReminder(id, user.accessToken);
       
       // Mettre à jour la liste des rappels
       setReminders(prev => prev.filter(r => r.id !== id));
@@ -99,19 +91,21 @@ const Header: React.FC = () => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
-  // Récupérer les rappels
+  // Récupérer les rappels en utilisant le service
   useEffect(() => {
     if (!user.accessToken) return;
-    (async () => {
+    
+    const fetchReminders = async () => {
       try {
-        const resp = await axios.get<Reminder[]>(Routes.GET_REMINDERS, {
-          headers: { Authorization: `Bearer ${user.accessToken}` }
-        });
-        setReminders(resp.data || []);
+        // Utiliser le service au lieu d'axios directement
+        const data = await getReminders(user.accessToken!);
+        setReminders(data);
       } catch (err) {
         console.error('Error fetching reminders:', err);
       }
-    })();
+    };
+    
+    fetchReminders();
   }, [user.accessToken]);
 
   // Formatage de la date pour l'affichage
