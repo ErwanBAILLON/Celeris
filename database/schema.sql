@@ -18,6 +18,7 @@ CREATE TABLE projects (
 CREATE TABLE tasks (
     id SERIAL PRIMARY KEY,
     project_id INTEGER REFERENCES projects(id),
+    owner_id INTEGER REFERENCES users(id),
     name VARCHAR(255) NOT NULL,
     description TEXT,
     start_date TIMESTAMP,

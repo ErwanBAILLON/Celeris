@@ -13,7 +13,11 @@ export class ProjectRepository {
     }
 
     static async delete(project: Project): Promise<void> {
-        await projectRepository.remove(project);
+        const result = await projectRepository.delete({ id: project.id });
+        if (result.affected === 0) {
+            console.error("Project was not deleted:", project.id);
+            throw new Error("Project was not deleted");
+        }
     }
 
     static async findById(id: string): Promise<Project | null> {

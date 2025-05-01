@@ -35,6 +35,8 @@ type RegistrationData = {
 
 type UserStore = {
   user: User;
+  isHydrated: boolean;
+  setHydrated: () => void;
   setUser: (user: User) => void;
   clearUser: () => void;
   login: (credentials: Credentials) => Promise<void>;
@@ -46,6 +48,8 @@ export const useUserStore = create<UserStore>()(
   persist(
     (set) => ({
       user: { username: '', email: '' },
+      isHydrated: false,
+      setHydrated: () => set({ isHydrated: true }),
 
       setUser: (user) => set({ user }),
 
@@ -102,6 +106,9 @@ export const useUserStore = create<UserStore>()(
     {
       name: 'zustand-user-storage',
       storage: createJSONStorage<UserStore>(() => indexedDBStorage),
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated();
+      },
     }
   )
 );
