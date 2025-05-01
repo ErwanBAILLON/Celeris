@@ -17,7 +17,7 @@ export class Reminder {
     @Column({ name: "status", unique: true, type: 'text' })
     status: string;
 
-    @Column({ name: "date_time", type: 'timestamp' })
+    @Column({ name: "datetime", type: 'timestamp' })
     dateTime: Date;
 
     @ManyToOne(() => User, (user) => user.tasks)
