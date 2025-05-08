@@ -30,19 +30,10 @@ const taskExporter: (task: Task) => object = (task: Task) => {
 
 projectRouter.get('/', authMiddleware, async (req, res) => {
     try {
-        const userId = req.user!.userId;
+        const { userId } = req.user!;
         const projects = await ProjectRepository.findByUserId(userId);
         const exportedProjects = projects.map(projectExporter);
-        const exportedTasks = await Promise.all(
-            projects.map(async (project) => {
-                const tasks = await TaskRepository.findByProjectId(project.id.toString());
-                if (!tasks) {
-                    return [];
-                }
-                return tasks.map(taskExporter);
-            })
-        );
-        res.status(200).json({ projects: exportedProjects, tasks: exportedTasks });
+        res.status(200).json(exportedProjects);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal server error' });
@@ -51,16 +42,10 @@ projectRouter.get('/', authMiddleware, async (req, res) => {
 
 projectRouter.get('/:id', authMiddleware, async (req, res) => {
     try {
-        const userId = req.user!.userId;
         const { id } = req.params;
         const project = await ProjectRepository.findById(id);
         if (!project) {
             res.status(404).json({ error: 'Project not found' });
-            return;
-        }
-        const isOwner = await ProjectRepository.isOwner(project.id, userId);
-        if (!isOwner) {
-            res.status(403).json({ error: 'Forbidden' });
             return;
         }
         const exportedProject = projectExporter(project);
@@ -75,7 +60,7 @@ projectRouter.get('/:id', authMiddleware, async (req, res) => {
 
 projectRouter.post('/', authMiddleware, async (req, res) => {
     try {
-        const userId = req.user!.userId;
+        const { userId } = req.user!;
         const user = await UserRepository.findById(userId);
         if (!user) {
             res.status(404).json({ error: 'User not found' });
@@ -106,16 +91,10 @@ projectRouter.post('/', authMiddleware, async (req, res) => {
 projectRouter.put('/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.user!.userId;
         const { name, description, startDate, endDate } = req.body;
         const project = await ProjectRepository.findById(id);
         if (!project) {
             res.status(404).json({ error: 'Project not found' });
-            return;
-        }
-        const isOwner = await ProjectRepository.isOwner(project.id, userId);
-        if (!isOwner) {
-            res.status(403).json({ error: 'Forbidden' });
             return;
         }
         project.name = name;
@@ -139,15 +118,9 @@ projectRouter.put('/:id', authMiddleware, async (req, res) => {
 projectRouter.delete('/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.user!.userId;
         const project = await ProjectRepository.findById(id);
         if (!project) {
             res.status(404).json({ error: 'Project not found' });
-            return;
-        }
-        const isOwner = await ProjectRepository.isOwner(project.id, userId);
-        if (!isOwner) {
-            res.status(403).json({ error: 'Forbidden' });
             return;
         }
         await ProjectRepository.delete(project);
@@ -173,18 +146,11 @@ projectRouter.post('/:id/tasks', authMiddleware, async (req, res) => {
             res.status(404).json({ error: 'Project not found' });
             return;
         }
-        const isOwner = await ProjectRepository.isOwner(project.id, userId);
-        if (!isOwner) {
-            res.status(403).json({ error: 'Forbidden' });
-            return;
-        }
         const task = new Task();
         task.name = name;
         task.description = description;
         task.startDate = startDate;
         task.endDate = endDate;
-        task.status = status;
-        task.priority = priority;
         task.project = project;
         const createdTask = await TaskRepository.create(task);
         if (!createdTask) {
@@ -202,16 +168,10 @@ projectRouter.post('/:id/tasks', authMiddleware, async (req, res) => {
 
 projectRouter.get('/:id/tasks', authMiddleware, async (req, res) => {
     try {
-        const userId = req.user!.userId;
         const { id } = req.params;
         const project = await ProjectRepository.findById(id);
         if (!project) {
             res.status(404).json({ error: 'Project not found' });
-            return;
-        }
-        const isOwner = await ProjectRepository.isOwner(project.id, userId);
-        if (!isOwner) {
-            res.status(403).json({ error: 'Forbidden' });
             return;
         }
         const tasks = await TaskRepository.findByProjectId(id);
@@ -228,7 +188,6 @@ projectRouter.get('/:id/tasks', authMiddleware, async (req, res) => {
 projectRouter.get('/:id/tasks/:taskId', authMiddleware, async (req, res) => {
     try {
         const { id, taskId } = req.params;
-        const userId = req.user!.userId;
         const project = await ProjectRepository.findById(id);
         if (!project) {
             res.status(404).json({ error: 'Project not found' });
@@ -237,11 +196,6 @@ projectRouter.get('/:id/tasks/:taskId', authMiddleware, async (req, res) => {
         const task = await TaskRepository.findById(taskId);
         if (!task) {
             res.status(404).json({ error: 'Task not found' });
-            return;
-        }
-        const isOwner = await ProjectRepository.isOwner(project.id, userId);
-        if (!isOwner) {
-            res.status(403).json({ error: 'Forbidden' });
             return;
         }
         const exportedTask = taskExporter(task);
@@ -257,7 +211,6 @@ projectRouter.get('/:id/tasks/:taskId', authMiddleware, async (req, res) => {
 projectRouter.put('/:id/tasks/:taskId', authMiddleware, async (req, res) => {
     try {
         const { id, taskId } = req.params;
-        const userId = req.user!.userId;
         const { name, description, startDate, endDate } = req.body;
         const project = await ProjectRepository.findById(id);
         if (!project) {
@@ -267,11 +220,6 @@ projectRouter.put('/:id/tasks/:taskId', authMiddleware, async (req, res) => {
         const task = await TaskRepository.findById(taskId);
         if (!task) {
             res.status(404).json({ error: 'Task not found' });
-            return;
-        }
-        const isOwner = await ProjectRepository.isOwner(project.id, userId);
-        if (!isOwner) {
-            res.status(403).json({ error: 'Forbidden' });
             return;
         }
         task.name = name;
@@ -294,7 +242,6 @@ projectRouter.put('/:id/tasks/:taskId', authMiddleware, async (req, res) => {
 
 projectRouter.delete('/:id/tasks/:taskId', authMiddleware, async (req, res) => {
     try {
-        const userId = req.user!.userId;
         const { id, taskId } = req.params;
         const project = await ProjectRepository.findById(id);
         if (!project) {
@@ -304,11 +251,6 @@ projectRouter.delete('/:id/tasks/:taskId', authMiddleware, async (req, res) => {
         const task = await TaskRepository.findById(taskId);
         if (!task) {
             res.status(404).json({ error: 'Task not found' });
-            return;
-        }
-        const isOwner = await ProjectRepository.isOwner(project.id, userId);
-        if (!isOwner) {
-            res.status(403).json({ error: 'Forbidden' });
             return;
         }
         await TaskRepository.delete(task);
