@@ -28,7 +28,7 @@ export async function getOfflineRequests() {
     req.onerror = () => reject(req.error);
   });
   console.log("Offline requests:", data);
-  return data;
+  return data
 }
 
 const generateNotication = (method: 'GET' | 'POST' | 'PUT' | 'DELETE', message: string) => {
