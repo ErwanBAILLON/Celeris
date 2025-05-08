@@ -1,22 +1,20 @@
-import axios from 'axios';
+import api from '../../utils/api';
 import { Routes } from '../../utils/routes';
 
 export interface Reminder {
   id: string;
-  title: string;
-  date: string;
+  name: string;
+  dateTime: string;
   description?: string;
-  completed?: boolean;
+  status: string;
 }
 
 /**
- * Récupère tous les rappels de l'utilisateur
+ * Get all reminders for the user
  */
-export const getReminders = async (token: string): Promise<Reminder[]> => {
+export const getReminders = async (): Promise<Reminder[]> => {
   try {
-    const response = await axios.get<Reminder[]>(Routes.GET_REMINDERS, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const response = await api.get<Reminder[]>(Routes.GET_REMINDERS);
     return response.data || [];
   } catch (error) {
     console.error('Error fetching reminders:', error);
@@ -25,13 +23,11 @@ export const getReminders = async (token: string): Promise<Reminder[]> => {
 };
 
 /**
- * Supprime un rappel par son ID
+ * Delete a reminder by its ID
  */
-export const deleteReminder = async (reminderId: string, token: string): Promise<void> => {
+export const deleteReminder = async (reminderId: string): Promise<void> => {
   try {
-    await axios.delete(Routes.DELETE_REMINDER(reminderId), {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    await api.delete(Routes.DELETE_REMINDER(reminderId));
   } catch (error) {
     console.error('Error deleting reminder:', error);
     throw error;
@@ -39,19 +35,15 @@ export const deleteReminder = async (reminderId: string, token: string): Promise
 };
 
 /**
- * Crée un nouveau rappel
+ * Create a new reminder
  */
 export const createReminder = async (
-  reminderData: Omit<Reminder, 'id'>,
-  token: string
+  reminderData: Omit<Reminder, 'id'>
 ): Promise<Reminder> => {
   try {
-    const response = await axios.post<Reminder>(
+    const response = await api.post<Reminder>(
       Routes.CREATE_REMINDER,
-      reminderData,
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
+      reminderData
     );
     return response.data;
   } catch (error) {
@@ -61,20 +53,16 @@ export const createReminder = async (
 };
 
 /**
- * Met à jour un rappel existant
+ * Update an existing reminder
  */
 export const updateReminder = async (
   reminderId: string,
-  reminderData: Partial<Reminder>,
-  token: string
+  reminderData: Partial<Reminder>
 ): Promise<Reminder> => {
   try {
-    const response = await axios.put<Reminder>(
+    const response = await api.put<Reminder>(
       Routes.UPDATE_REMINDER(reminderId),
-      reminderData,
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
+      reminderData
     );
     return response.data;
   } catch (error) {

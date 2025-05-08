@@ -1,16 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, ManyToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, ManyToMany, Unique } from 'typeorm';
 import { User } from './User';
 import { Task } from './Task';
 
 @Entity('tags')
+@Unique(['name', 'user'])
 export class Tag {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ name: "name", unique: true, type: 'varchar' })
+    @Column({ name: "name", type: 'varchar' })
     name: string;
 
-    @Column({ name: "description", unique: true, type: 'text' })
+    @Column({ name: "description", type: 'text', nullable: true })
     description: string;
 
     @Column({ name: "color", type: 'varchar' })

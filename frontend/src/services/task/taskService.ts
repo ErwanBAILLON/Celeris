@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../../utils/api';
 import { Routes } from '../../utils/routes';
 
 export interface Task {
@@ -11,45 +11,33 @@ export interface Task {
   priority: string;
 }
 
-export const getTasks = async (
-  projectId: string,
-  token: string
-): Promise<Task[]> => {
+export const getTasks = async (projectId: string): Promise<Task[]> => {
   const url = `${Routes.GET_PROJECT_BY_ID(projectId)}/tasks`;
-  const resp = await axios.get<Task[]>(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const resp = await api.get<Task[]>(url);
   return resp.data;
 };
 
 // Fonction createTask améliorée avec plus de logging et de gestion d'erreurs
 export const createTask = async (
   projectId: string,
-  taskData: Partial<Task>,
-  token: string
+  taskData: Partial<Task>
 ): Promise<Task> => {
   try {
     console.log('Creating task with data:', taskData, 'for project:', projectId);
 
-    const response = await axios.post<Task>(
+    const response = await api.post<Task>(
       `${Routes.GET_PROJECT_BY_ID(projectId)}/tasks`,
-      taskData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      }
+      taskData
     );
 
     console.log('Server response for createTask:', response);
 
-    // Vérifier si la réponse contient les données attendues
+    // Check if the response contains the expected data
     if (!response.data || !response.data.id) {
       console.warn('Invalid response from server for createTask:', response.data);
 
-      // Si le serveur a répondu avec succès mais sans données valides,
-      // on crée un objet de tâche par défaut pour éviter les erreurs côté frontend
+      // If the server responded successfully but without valid data,
+      // create a default task object to avoid errors on the frontend
       return {
         id: `temp-${Date.now()}`,
         ...taskData,
@@ -60,9 +48,9 @@ export const createTask = async (
   } catch (error) {
     console.error('Error in createTask service:', error);
 
-    // Rethrow error with enhanced context
-    if (axios.isAxiosError(error)) {
-      console.error('Server response:', error.response?.data);
+    // Log additional error context
+    if (error && typeof error === 'object' && 'response' in error) {
+      console.error('Server response:', (error as any).response?.data);
     }
 
     throw new Error(
@@ -83,23 +71,17 @@ export const updateTask = async (
     endDate: string;
     status: string;
     priority: string;
-  },
-  token: string
+  }
 ): Promise<Task> => {
   const url = `${Routes.GET_PROJECT_BY_ID(projectId)}/tasks/${taskId}`;
-  const resp = await axios.put<Task>(url, taskData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const resp = await api.put<Task>(url, taskData);
   return resp.data;
 };
 
 export const deleteTask = async (
   projectId: string,
-  taskId: string,
-  token: string
+  taskId: string
 ): Promise<void> => {
   const url = `${Routes.GET_PROJECT_BY_ID(projectId)}/tasks/${taskId}`;
-  await axios.delete<void>(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  await api.delete<void>(url);
 };

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, ManyToMany } from 'typeorm';
 import { User } from './User';
 import { Task } from './Task';
 import { Project } from './Project';
@@ -8,25 +8,24 @@ export class Reminder {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ name: "name", unique: true, type: 'varchar' })
+    @Column({ name: "name", type: 'varchar' })
     name: string;
 
-    @Column({ name: "description", unique: true, type: 'text' })
+    @Column({ name: "description", type: 'text', nullable: true })
     description: string;
 
-    @Column({ name: "status", unique: true, type: 'text' })
+    @Column({ name: "status", type: 'varchar' })
     status: string;
 
     @Column({ name: "datetime", type: 'timestamp' })
     dateTime: Date;
 
-    @ManyToOne(() => User, (user) => user.tasks)
+    @ManyToOne(() => User, (user) => user.reminders)
     @JoinColumn({ name: 'owner_id' })
     user: User;
 
-    @ManyToOne(() => Task, (task) => task.reminders)
-    @JoinColumn({ name: 'task_id' })
-    task: Task;
+    @ManyToMany(() => Task, (task) => task.reminders)
+    task: Task[];
 
     @ManyToOne(() => Project, (project) => project.reminders)
     @JoinColumn({ name: 'project_id' })

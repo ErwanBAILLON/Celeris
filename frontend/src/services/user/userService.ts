@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Routes } from '../../utils/routes';
+import api from '../../utils/api';
 
 class UserService {
 
@@ -23,9 +24,23 @@ class UserService {
     }
   }
 
+  async refreshToken(refreshToken: string) {
+    try {
+      const response = await axios.get(Routes.REFRESH, {
+        headers: {
+          'x-refresh-token': refreshToken
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      throw error;
+    }
+  }
+
   async logout() {
     try {
-      const response = await axios.post(Routes.LOGOUT);
+      const response = await api.post(Routes.LOGOUT);
       return response.data;
     } catch (error) {
       console.error('Error during logout:', error);

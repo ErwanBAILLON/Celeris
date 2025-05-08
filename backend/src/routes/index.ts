@@ -1,12 +1,14 @@
 import { Router } from 'express';
-import authRouter from './auth';
-import projectRouter from './project';
-import reminderRouter from './reminder';
+import authRoutes from './auth';
+import projectRoutes from './project';
+import reminderRoutes from './reminder';
+import tagRoutes from './tag';
 
 const router = Router();
 
-router.use('/auth', authRouter);
-router.use('/projects', projectRouter);
-router.use('/reminders', reminderRouter);
+router.use('/auth', authRoutes);
+router.use('/projects', projectRoutes);
+router.use('/reminders', reminderRoutes);
+router.use('/tags', tagRoutes);
 
 export default router;

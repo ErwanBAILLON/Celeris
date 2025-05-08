@@ -3,11 +3,10 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION ? parseInt(process.env.JWT_EXPIRATION) : 3600;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "refresh-secret";
-const REFRESH_TOKEN_EXPIRATION = process.env.REFRESH_TOKEN_EXPIRATION ? parseInt(process.env.REFRESH_TOKEN_EXPIRATION) : 604800; // 7 jours
+const REFRESH_TOKEN_EXPIRATION = process.env.REFRESH_TOKEN_EXPIRATION ? parseInt(process.env.REFRESH_TOKEN_EXPIRATION) : 604800; // 7 days
 
 export const generateToken = (userId: number): string => {
-    const expiration = Math.max(JWT_EXPIRATION, 86400);
-    return jwt.sign({ userId }, JWT_SECRET, { expiresIn: expiration });
+    return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
 };
 
 export const verifyToken = (token: string): { userId: number } | null => {

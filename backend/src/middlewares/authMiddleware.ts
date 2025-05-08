@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "refresh-secret";
 
 declare global {
     namespace Express {
@@ -64,7 +65,7 @@ export const refreshTokenMiddleware = (req: Request, res: Response, next: NextFu
             return;
         }
 
-        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET || "refresh-secret") as { userId: number };
+        const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET) as { userId: number };
         req.user = {
             userId: decoded.userId
         };
