@@ -17,7 +17,21 @@ const Header: React.FC = () => {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [reminderOpen, setReminderOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -237,6 +251,23 @@ const Header: React.FC = () => {
               )}
             </div>
 
+            <div title={isOnline ? 'Online' : 'Offline'} className="p-2">
+              {isOnline ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.832 12.06a15.952 15.952 0 0118.336 0" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.655 15.272a10.968 10.968 0 0112.688 0" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.48 18.485a6 6 0 017.04 0" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.832 12.06a15.952 15.952 0 0118.336 0" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.655 15.272a10.968 10.968 0 0112.688 0" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.48 18.485a6 6 0 017.04 0" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3l18 18" />
+                </svg>
+              )}
+            </div>
+
             {/* User profile and logout */}
             <div className="relative group">
               <button className="flex items-center space-x-2 focus:outline-none">
@@ -282,6 +313,23 @@ const Header: React.FC = () => {
                 </span>
               )}
             </button>
+
+            <div title={isOnline ? 'Online' : 'Offline'} className="p-2">
+              {isOnline ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.832 12.06a15.952 15.952 0 0118.336 0" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.655 15.272a10.968 10.968 0 0112.688 0" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.48 18.485a6 6 0 017.04 0" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.832 12.06a15.952 15.952 0 0118.336 0" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.655 15.272a10.968 10.968 0 0112.688 0" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.48 18.485a6 6 0 017.04 0" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3l18 18" />
+                </svg>
+              )}
+            </div>
 
             <button
               onClick={() => setMobileMenuOpen(prev => !prev)}
