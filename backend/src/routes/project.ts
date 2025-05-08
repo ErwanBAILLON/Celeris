@@ -84,10 +84,7 @@ projectRouter.post('/', authMiddleware, async (req, res) => {
             res.status(500).json({ error: 'Failed to create project' });
             return;
         }
-        const response = {
-            message: 'Project created successfully',
-        }
-        res.status(201).json(response);
+        res.status(201).json(projectExporter(createdProject));
         return;
     } catch (error) {
         console.error(error);
@@ -119,10 +116,7 @@ projectRouter.put('/:id', authMiddleware, async (req, res) => {
             res.status(500).json({ error: 'Failed to update project' });
             return;
         }
-        const response = {
-            message: 'Project updated successfully',
-        }
-        res.status(200).json(response);
+        res.status(200).json(projectExporter(updatedProject));
         return;
     } catch (error) {
         console.error(error);
@@ -184,10 +178,7 @@ projectRouter.post('/:id/tasks', authMiddleware, async (req, res) => {
             res.status(500).json({ error: 'Failed to create task' });
             return;
         }
-        const response = {
-            message: 'Task created successfully',
-        }
-        res.status(201).json(response);
+        res.status(201).json(taskExporter(createdTask));
         return;
     } catch (error) {
         console.error(error);
@@ -276,10 +267,7 @@ projectRouter.put('/:id/tasks/:taskId', authMiddleware, async (req, res) => {
             res.status(500).json({ error: 'Failed to update task' });
             return;
         }
-        const response = {
-            message: 'Task updated successfully',
-        }
-        res.status(200).json(response);
+        res.status(200).json(taskExporter(updatedTask));
         return;
     } catch (error) {
         console.error(error);
