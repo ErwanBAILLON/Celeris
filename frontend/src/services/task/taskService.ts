@@ -27,7 +27,7 @@ export const createTask = async (
   projectId: string,
   taskData: Partial<Task>,
   token: string
-): Promise<Task> => {
+): Promise<Task | undefined> => {
   try {
     console.log('Creating task with data:', taskData, 'for project:', projectId);
 
@@ -64,12 +64,6 @@ export const createTask = async (
     if (axios.isAxiosError(error)) {
       console.error('Server response:', error.response?.data);
     }
-
-    throw new Error(
-      `Failed to create task: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`
-    );
   }
 }
 

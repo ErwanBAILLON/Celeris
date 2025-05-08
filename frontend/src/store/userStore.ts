@@ -59,7 +59,7 @@ export const useUserStore = create<UserStore>()(
         try {
           const data = await UserService.login(credentials);
           if (!data) {
-            throw new Error('Login failed');
+            console.error('Login failed');
           }
           set({ user: { username: data.name, accessToken: data.accessToken, refreshToken: data.refreshToken } });
         } catch (error) {
@@ -72,7 +72,8 @@ export const useUserStore = create<UserStore>()(
         try {
           const data: UserResponse = await UserService.register(userData);
           if (!data) {
-            throw new Error('Registration failed');
+            console.error('Registration failed');
+            return;
           }
           await UserService.login({ username: userData.username, password: userData.password });
           console.log('User data:', data);
@@ -92,7 +93,7 @@ export const useUserStore = create<UserStore>()(
 
             const { accessToken, refreshToken } = user;
             if (!accessToken || !refreshToken) {
-              throw new Error('User is not logged in');
+              console.error('User is not logged in');
             }
 
             await UserService.logout();

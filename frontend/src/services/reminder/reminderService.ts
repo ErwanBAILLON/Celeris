@@ -12,7 +12,7 @@ export interface Reminder {
 /**
  * Récupère tous les rappels de l'utilisateur
  */
-export const getReminders = async (token: string): Promise<Reminder[]> => {
+export const getReminders = async (token: string): Promise<Reminder[] | undefined> => {
   try {
     const response = await axios.get<Reminder[]>(Routes.GET_REMINDERS, {
       headers: { Authorization: `Bearer ${token}` }
@@ -20,21 +20,19 @@ export const getReminders = async (token: string): Promise<Reminder[]> => {
     return response.data || [];
   } catch (error) {
     console.error('Error fetching reminders:', error);
-    throw error;
   }
 };
 
 /**
  * Supprime un rappel par son ID
  */
-export const deleteReminder = async (reminderId: string, token: string): Promise<void> => {
+export const deleteReminder = async (reminderId: string, token: string): Promise<void | undefined> => {
   try {
     await axios.delete(Routes.DELETE_REMINDER(reminderId), {
       headers: { Authorization: `Bearer ${token}` }
     });
   } catch (error) {
     console.error('Error deleting reminder:', error);
-    throw error;
   }
 };
 
@@ -44,7 +42,7 @@ export const deleteReminder = async (reminderId: string, token: string): Promise
 export const createReminder = async (
   reminderData: Omit<Reminder, 'id'>,
   token: string
-): Promise<Reminder> => {
+): Promise<Reminder | undefined> => {
   try {
     const response = await axios.post<Reminder>(
       Routes.CREATE_REMINDER,
@@ -56,7 +54,6 @@ export const createReminder = async (
     return response.data;
   } catch (error) {
     console.error('Error creating reminder:', error);
-    throw error;
   }
 };
 
@@ -67,7 +64,7 @@ export const updateReminder = async (
   reminderId: string,
   reminderData: Partial<Reminder>,
   token: string
-): Promise<Reminder> => {
+): Promise<Reminder | undefined> => {
   try {
     const response = await axios.put<Reminder>(
       Routes.UPDATE_REMINDER(reminderId),
@@ -79,6 +76,5 @@ export const updateReminder = async (
     return response.data;
   } catch (error) {
     console.error('Error updating reminder:', error);
-    throw error;
   }
 };

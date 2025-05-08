@@ -56,10 +56,10 @@ const Register = () => {
             placeholder="Password"
             className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <button className="p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+          <button type="submit" className="p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
             Register
           </button>
-          <Link to="/" className="p-3 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition text-center">
+          <Link to="/login" className="p-3 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition text-center">
             Already have an account? Login
           </Link>
           {error && <p className="text-red-500 text-sm">{error}</p>}

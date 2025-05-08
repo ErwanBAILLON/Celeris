@@ -147,13 +147,13 @@ const ProjectDetailPage: React.FC = () => {
         try {
           const updated = await updateTask(id, editingTask.id, payload, token);
           console.log('Server response after update:', updated);
-          
+
           // Mise à jour optimiste de l'interface avec une approche plus défensive
           setTasks(prev => {
             try {
-              const newTasks = prev.map(t => t.id === editingTask.id ? { 
-                ...t, 
-                ...payload, 
+              const newTasks = prev.map(t => t.id === editingTask.id ? {
+                ...t,
+                ...payload,
                 id: editingTask.id // Conserver l'ID original
               } : t);
               console.log('Tasks updated after edit:', newTasks);
@@ -172,10 +172,10 @@ const ProjectDetailPage: React.FC = () => {
         try {
           const newTask = await createTask(id, payload, token);
           console.log('Server response for new task:', newTask);
-          
+
           // Création d'un objet tâche compatible avec notre interface, indépendamment de la réponse du serveur
           const formattedTask: Task = {
-            id: newTask.id || `temp-${Date.now()}`, // Fallback ID si le serveur n'en renvoie pas
+            id: (newTask?.id ?? `temp-${Date.now()}`), // Fallback ID si le serveur n'en renvoie pas
             name: payload.name,
             description: payload.description,
             startDate: payload.startDate,
@@ -184,9 +184,9 @@ const ProjectDetailPage: React.FC = () => {
             priority: payload.priority,
             // Ajoutez d'autres propriétés requises par l'interface Task ici avec des valeurs par défaut
           };
-          
+
           console.log('Formatted task to add to UI:', formattedTask);
-          
+
           // Ajouter la nouvelle tâche au state
           setTasks(prev => {
             try {
@@ -217,13 +217,13 @@ const ProjectDetailPage: React.FC = () => {
       notificationElement.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
       notificationElement.textContent = `Tâche ${actionType} avec succès! La liste a été mise à jour.`;
       document.body.appendChild(notificationElement);
-      
+
       setTimeout(() => {
         if (document.body.contains(notificationElement)) {
           document.body.removeChild(notificationElement);
         }
       }, 3000);
-      
+
       // Réinitialiser le formulaire et fermer la modal
       setError(null);
       setIsEditing(false);
@@ -232,7 +232,7 @@ const ProjectDetailPage: React.FC = () => {
     } catch (err) {
       console.error('Error handling task submission:', err);
       setError('Erreur lors de la sauvegarde de la tâche. Le serveur a peut-être bien enregistré la tâche mais une erreur frontend est survenue.');
-      
+
       // Notification d'erreur qui suggère de recharger en cas de problème
       const errorNotification = document.createElement('div');
       errorNotification.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
@@ -241,7 +241,7 @@ const ProjectDetailPage: React.FC = () => {
         <button class="underline mt-1 hover:text-gray-200" onclick="window.location.reload()">Recharger la page</button>
       `;
       document.body.appendChild(errorNotification);
-      
+
       setTimeout(() => {
         if (document.body.contains(errorNotification)) {
           document.body.removeChild(errorNotification);
@@ -252,12 +252,12 @@ const ProjectDetailPage: React.FC = () => {
 
   const calculateTasksByDate = (taskList: Task[]): Record<string, Task[]> => {
     console.log('Calculating tasks by date with tasks:', taskList);
-    
+
     if (!Array.isArray(taskList)) {
       console.error('Invalid taskList, not an array:', taskList);
       return {};
     }
-    
+
     try {
       return taskList
         .filter(t => {
@@ -265,17 +265,17 @@ const ProjectDetailPage: React.FC = () => {
             console.warn('Null or undefined task found in list');
             return false;
           }
-          
+
           if (!t.id) {
             console.warn('Task without ID:', t);
             return false;
           }
-          
+
           if (!t.startDate) {
             console.warn('Task without startDate:', t);
             return false;
           }
-          
+
           try {
             // Vérifier que la date est valide
             const date = new Date(t.startDate);
@@ -701,28 +701,28 @@ const ProjectDetailPage: React.FC = () => {
                       try {
                         const s = task.startDate ? new Date(task.startDate) : new Date();
                         const e = task.endDate ? new Date(task.endDate) : new Date();
-                        
+
                         // Vérifier que les dates sont valides
                         if (isNaN(s.getTime()) || isNaN(e.getTime())) {
                           console.warn('Task with invalid date skipped:', task);
                           return null;
                         }
-                        
+
                         const startTime = s.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                         const endTime = e.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                         const isOverdue = e < now && task.status !== 'completed';
                         const isInProgress = s <= now && now <= e;
-                        
+
                         let statusBadge = 'bg-blue-100 text-blue-800';
                         if (task.status === 'completed') statusBadge = 'bg-green-100 text-green-800';
                         else if (task.status === 'pending') statusBadge = 'bg-yellow-100 text-yellow-800';
                         else if (!task.status) statusBadge = 'bg-gray-100 text-gray-800';
-                        
+
                         let priorityBadge = 'bg-gray-100 text-gray-800';
                         if (task.priority === 'high') priorityBadge = 'bg-red-100 text-red-800';
                         else if (task.priority === 'medium') priorityBadge = 'bg-yellow-100 text-yellow-800';
                         else if (task.priority === 'low') priorityBadge = 'bg-green-100 text-green-800';
-                        
+
                         return (
                           <div key={task.id} className="p-5 relative hover:bg-gray-50 transition">
                             <div className="absolute top-3 right-3 flex space-x-2 z-10">
@@ -745,37 +745,37 @@ const ProjectDetailPage: React.FC = () => {
                                 </svg>
                               </button>
                             </div>
-                            
+
                             <h4 className="font-semibold text-gray-800 text-lg mb-1 pr-16">{task.name}</h4>
-                            
+
                             <div className="flex items-center text-sm text-gray-600 mb-3">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
                               {startTime} - {endTime}
                             </div>
-                            
+
                             <p className="text-gray-700 mb-3 text-sm">{task.description}</p>
-                            
+
                             <div className="flex flex-wrap gap-2 mt-3">
                               <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusBadge}`}>
-                                {task.status && typeof task.status === 'string' 
-                                  ? task.status.charAt(0).toUpperCase() + task.status.slice(1) 
+                                {task.status && typeof task.status === 'string'
+                                  ? task.status.charAt(0).toUpperCase() + task.status.slice(1)
                                   : 'No Status'}
                               </span>
-                              
+
                               <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${priorityBadge}`}>
                                 {task.priority && typeof task.priority === 'string'
                                   ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1) + ' Priority'
                                   : 'No Priority'}
                               </span>
-                              
+
                               {isInProgress && (
                                 <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                   In Progress
                                 </span>
                               )}
-                              
+
                               {isOverdue && (
                                 <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                   Overdue

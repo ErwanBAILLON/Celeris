@@ -32,37 +32,37 @@ const Header: React.FC = () => {
   // Ajouter une fonction pour supprimer un rappel qui utilise le service
   const handleDeleteReminder = async (id: string, event: React.MouseEvent) => {
     event.stopPropagation(); // Empêcher le click de se propager
-    
+
     if (!user.accessToken) return;
-    
+
     try {
       // Utiliser le service au lieu d'axios directement
       await deleteReminder(id, user.accessToken);
-      
+
       // Mettre à jour la liste des rappels
       setReminders(prev => prev.filter(r => r.id !== id));
-      
+
       // Notification de succès
       const notificationElement = document.createElement('div');
       notificationElement.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
       notificationElement.textContent = 'Rappel supprimé avec succès';
       document.body.appendChild(notificationElement);
-      
+
       setTimeout(() => {
         if (document.body.contains(notificationElement)) {
           document.body.removeChild(notificationElement);
         }
       }, 3000);
-      
+
     } catch (err) {
       console.error('Error deleting reminder:', err);
-      
+
       // Notification d'erreur
       const errorElement = document.createElement('div');
       errorElement.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
       errorElement.textContent = 'Erreur lors de la suppression du rappel';
       document.body.appendChild(errorElement);
-      
+
       setTimeout(() => {
         if (document.body.contains(errorElement)) {
           document.body.removeChild(errorElement);
@@ -94,17 +94,21 @@ const Header: React.FC = () => {
   // Récupérer les rappels en utilisant le service
   useEffect(() => {
     if (!user.accessToken) return;
-    
+
     const fetchReminders = async () => {
       try {
         // Utiliser le service au lieu d'axios directement
         const data = await getReminders(user.accessToken!);
+        if (!data) {
+          console.error('No reminders found or error fetching reminders');
+          return;
+        }
         setReminders(data);
       } catch (err) {
         console.error('Error fetching reminders:', err);
       }
     };
-    
+
     fetchReminders();
   }, [user.accessToken]);
 
@@ -113,16 +117,16 @@ const Header: React.FC = () => {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return 'Date invalide';
-      
+
       const now = new Date();
       const isToday = date.toDateString() === now.toDateString();
-      
+
       const options: Intl.DateTimeFormatOptions = {
         hour: '2-digit',
         minute: '2-digit',
         ...(isToday ? {} : { day: 'numeric', month: 'short' })
       };
-      
+
       return `${isToday ? 'Aujourd\'hui' : ''} ${date.toLocaleTimeString('fr-FR', options)}`;
     } catch (e) {
       return 'Date invalide';
@@ -146,15 +150,15 @@ const Header: React.FC = () => {
 
           {/* Navigation - Desktop */}
           <nav className="hidden md:flex space-x-8">
-            <Link 
-              to="/home" 
+            <Link
+              to="/home"
               className={`py-1 hover:text-white transition-all duration-200 border-b-2 ${
-                location.pathname === '/home' 
+                location.pathname === '/home'
                   ? 'border-white text-white font-medium'
                   : 'border-transparent hover:border-white/50'
               }`}
             >
-              Projets
+              Projects
             </Link>
           </nav>
 
@@ -186,7 +190,7 @@ const Header: React.FC = () => {
                       {reminders.length}
                     </span>
                   </div>
-                  
+
                   <div className="max-h-96 overflow-y-auto divide-y divide-gray-100">
                     {reminders.length ? (
                       reminders.map(reminder => (
@@ -200,7 +204,7 @@ const Header: React.FC = () => {
                           <p className="text-sm text-gray-600 mt-1 line-clamp-2">
                             {reminder.title}
                           </p>
-                          
+
                           {/* Bouton de suppression */}
                           <button
                             onClick={(e) => handleDeleteReminder(reminder.id, e)}
@@ -219,7 +223,7 @@ const Header: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="p-3 bg-gray-50 text-center border-t border-gray-100">
                     <Link to="/reminders" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
                       Voir tous les rappels
@@ -240,7 +244,7 @@ const Header: React.FC = () => {
                   <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </button>
-              
+
               <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-lg shadow-xl z-50 scale-0 group-hover:scale-100 transform transition-all duration-150 origin-top-right opacity-0 group-hover:opacity-100">
                 <div className="p-2">
                   <button
@@ -274,7 +278,7 @@ const Header: React.FC = () => {
                 </span>
               )}
             </button>
-            
+
             <button
               onClick={() => setMobileMenuOpen(prev => !prev)}
               className="text-white focus:outline-none"
@@ -329,7 +333,7 @@ const Header: React.FC = () => {
                     <span className="text-xs text-gray-500">{formatDate(reminder.date)}</span>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">{reminder.title}</p>
-                  
+
                   {/* Bouton de suppression pour mobile */}
                   <button
                     onClick={(e) => handleDeleteReminder(reminder.id, e)}
