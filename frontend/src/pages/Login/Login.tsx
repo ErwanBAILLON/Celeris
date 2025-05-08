@@ -23,10 +23,8 @@ const Login = () => {
 
     // Add your login logic here
     const userData = { username, password };
-    console.log("Logging in user:", userData);
     try {
       await login({ username, password });
-      console.log("User logged in successfully");
       navigate("/home");
     } catch (error) {
       console.error("Login error:", error);

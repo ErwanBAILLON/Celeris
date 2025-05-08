@@ -25,10 +25,8 @@ const Register = () => {
 
     // Add your register logic here
     const userData = { username: name, password, email };
-    console.log("Registering user:", userData);
     try {
       await register(userData);
-      console.log("User registered successfully");
       navigate("/home");
     } catch (error) {
       console.error("Registration error:", error);

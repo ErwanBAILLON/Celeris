@@ -10,7 +10,6 @@ const NotificationPermission = () => {
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('message', (event) => {
-        console.log('Message received from Service Worker:', event.data);
         if (event.data && event.data.type === 'NEW_VERSION_AVAILABLE') {
           if (Notification.permission === 'granted') {
             new Notification('Nouvelle version disponible', {

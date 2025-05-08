@@ -76,7 +76,6 @@ export const useUserStore = create<UserStore>()(
             return;
           }
           await UserService.login({ username: userData.username, password: userData.password });
-          console.log('User data:', data);
           set({ user: { username: data.name, accessToken: data.accessToken, refreshToken: data.refreshToken } });
         } catch (error) {
           console.error('Registration failed:', error);

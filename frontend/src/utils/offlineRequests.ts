@@ -31,7 +31,6 @@ export async function syncOfflineRequests() {
     r.onsuccess = () => res(r.result);
     r.onerror = () => rej(r.error);
   });
-  console.log("Syncing offline requests:", allReq);
   if (allReq.length === 0) return;
   for (const req of allReq) {
     // Si la requête est expirée, supprimer via une transaction nouvelle
@@ -47,14 +46,11 @@ export async function syncOfflineRequests() {
         body: req.body,
         headers: req.headers,
       });
-      console.log("Offline request sent:", req);
-      console.log("Response:", resp);
       if (resp.ok) {
         // Supprimer la requête synchronisée avec une nouvelle transaction
         const txDel = db.transaction("requests", "readwrite");
         txDel.objectStore("requests").delete(req.id);
         await new Promise(resolve => { txDel.oncomplete = resolve; });
-        console.log("Request deleted from store:", req.id);
       } else {
         console.error("Failed to sync request:", req, resp);
       }

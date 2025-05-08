@@ -138,10 +138,7 @@ const ProjectsPage: React.FC = () => {
       }
 
       try {
-        console.log('Fetching projects...');
         const resp = await getProjects(token);
-
-        console.log('Projects received:', resp);
 
         if (isMounted) {
           if (Array.isArray(resp)) {
