@@ -51,6 +51,25 @@ self.addEventListener('fetch', event => {
       })
     );
   }
+  if (event.request.url.includes('/tasks')) {
+    event.respondWith(
+      caches.match(event.request).then(response => {
+        if (response) {
+          const expirationTime = 24 * 60 * 60 * 1000; // 1 jour
+          const now = Date.now();
+          const cachedTime = response.headers.get('date') ? new Date(response.headers.get('date')).getTime() : now;
+
+          if (now - cachedTime > expirationTime) {
+            self.registration.showNotification('Requête expirée', {
+              body: 'Une requête pour "tasks" a expiré.',
+              icon: '/icon.png',
+            });
+          }
+        }
+        return response || fetch(event.request);
+      })
+    );
+  }
 });
 
 self.addEventListener('sync', event => {
