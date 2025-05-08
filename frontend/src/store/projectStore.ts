@@ -3,11 +3,6 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { indexedDBStorage } from './indexedDBStorage';
 import ProjectService from '../services/project/projectService';
 
-export type Project = {
-  id: string;
-  name: string;
-}
-
 export type ProjectDetail = {
   id: string;
   name: string;
@@ -17,22 +12,23 @@ export type ProjectDetail = {
 }
 
 type ProjectStore = {
-  projects: Project[];
+  projects: ProjectDetail[];
   isHydrated: boolean;
   setHydrated: () => void;
-  addProject: (project: Project) => void;
+  addProject: (project: ProjectDetail) => void;
   removeProject: (projectId: string) => void;
-  updateProject: (projectId: string, updatedProject: Partial<Project>) => void;
+  updateProject: (projectId: string, updatedProject: Partial<ProjectDetail>) => void;
   clearProjects: () => void;
+  getProjects: (token: string) => Promise<ProjectDetail[] | undefined>;
   getProjectById: (id: string, token: string) => Promise<ProjectDetail | undefined>;
-  createProject: (projectData: Partial<ProjectDetail>, token: string) => Promise<Project | undefined>;
+  createProject: (projectData: Partial<ProjectDetail>, token: string) => Promise<ProjectDetail | undefined>;
   deleteProject: (id: string, token: string) => Promise<void>;
-  updateProjectService: (id: string, data: Partial<ProjectDetail>, token: string) => Promise<Project | undefined>;
+  updateProjectService: (id: string, data: Partial<ProjectDetail>, token: string) => Promise<ProjectDetail | undefined>;
 };
 
 export const useProjectStore = create<ProjectStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       projects: [],
       isHydrated: false,
       setHydrated: () => set({ isHydrated: true }),
@@ -46,6 +42,26 @@ export const useProjectStore = create<ProjectStore>()(
           ),
         })),
       clearProjects: () => set({ projects: [] }),
+
+      getProjects: async (token) => {
+        try {
+          const data = await ProjectService.getProjects(token);
+          if (!data) {
+            console.error('Error fetching projects:', data);
+            return undefined;
+          }
+          set({ projects: data });
+          return data;
+        } catch (error) {
+          console.error('Error fetching projects:', error);
+          const projects = get().projects;
+          if (projects.length > 0) {
+            console.warn('Returning cached projects:', projects);
+            return projects;
+          }
+          return undefined;
+        }
+      },
 
       getProjectById: async (id, token) => {
         try {

@@ -33,7 +33,16 @@ projectRouter.get('/', authMiddleware, async (req, res) => {
         const userId = req.user!.userId;
         const projects = await ProjectRepository.findByUserId(userId);
         const exportedProjects = projects.map(projectExporter);
-        res.status(200).json(exportedProjects);
+        const exportedTasks = await Promise.all(
+            projects.map(async (project) => {
+                const tasks = await TaskRepository.findByProjectId(project.id.toString());
+                if (!tasks) {
+                    return [];
+                }
+                return tasks.map(taskExporter);
+            })
+        );
+        res.status(200).json({ projects: exportedProjects, tasks: exportedTasks });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal server error' });
@@ -49,7 +58,8 @@ projectRouter.get('/:id', authMiddleware, async (req, res) => {
             res.status(404).json({ error: 'Project not found' });
             return;
         }
-        if (project.user.id !== userId) {
+        const isOwner = await ProjectRepository.isOwner(project.id, userId);
+        if (!isOwner) {
             res.status(403).json({ error: 'Forbidden' });
             return;
         }
@@ -103,7 +113,8 @@ projectRouter.put('/:id', authMiddleware, async (req, res) => {
             res.status(404).json({ error: 'Project not found' });
             return;
         }
-        if (project.user.id !== userId) {
+        const isOwner = await ProjectRepository.isOwner(project.id, userId);
+        if (!isOwner) {
             res.status(403).json({ error: 'Forbidden' });
             return;
         }
@@ -134,7 +145,8 @@ projectRouter.delete('/:id', authMiddleware, async (req, res) => {
             res.status(404).json({ error: 'Project not found' });
             return;
         }
-        if (project.user.id !== userId) {
+        const isOwner = await ProjectRepository.isOwner(project.id, userId);
+        if (!isOwner) {
             res.status(403).json({ error: 'Forbidden' });
             return;
         }
@@ -161,7 +173,8 @@ projectRouter.post('/:id/tasks', authMiddleware, async (req, res) => {
             res.status(404).json({ error: 'Project not found' });
             return;
         }
-        if (project.user.id !== userId) {
+        const isOwner = await ProjectRepository.isOwner(project.id, userId);
+        if (!isOwner) {
             res.status(403).json({ error: 'Forbidden' });
             return;
         }
@@ -196,7 +209,8 @@ projectRouter.get('/:id/tasks', authMiddleware, async (req, res) => {
             res.status(404).json({ error: 'Project not found' });
             return;
         }
-        if (project.user.id !== userId) {
+        const isOwner = await ProjectRepository.isOwner(project.id, userId);
+        if (!isOwner) {
             res.status(403).json({ error: 'Forbidden' });
             return;
         }
@@ -225,7 +239,8 @@ projectRouter.get('/:id/tasks/:taskId', authMiddleware, async (req, res) => {
             res.status(404).json({ error: 'Task not found' });
             return;
         }
-        if (project.user.id !== userId) {
+        const isOwner = await ProjectRepository.isOwner(project.id, userId);
+        if (!isOwner) {
             res.status(403).json({ error: 'Forbidden' });
             return;
         }
@@ -254,7 +269,8 @@ projectRouter.put('/:id/tasks/:taskId', authMiddleware, async (req, res) => {
             res.status(404).json({ error: 'Task not found' });
             return;
         }
-        if (project.user.id !== userId) {
+        const isOwner = await ProjectRepository.isOwner(project.id, userId);
+        if (!isOwner) {
             res.status(403).json({ error: 'Forbidden' });
             return;
         }
@@ -290,7 +306,8 @@ projectRouter.delete('/:id/tasks/:taskId', authMiddleware, async (req, res) => {
             res.status(404).json({ error: 'Task not found' });
             return;
         }
-        if (project.user.id !== userId) {
+        const isOwner = await ProjectRepository.isOwner(project.id, userId);
+        if (!isOwner) {
             res.status(403).json({ error: 'Forbidden' });
             return;
         }

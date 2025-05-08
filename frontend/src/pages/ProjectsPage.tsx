@@ -4,12 +4,14 @@ import { Routes } from '../utils/routes';
 import { Link } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
 import { useProjectStore } from '../store/projectStore';
+import { syncOfflineRequests } from '../utils/offlineRequests';
 
 interface Project { id: string; name: string; }
 
 const ProjectsPage: React.FC = () => {
   const token = useUserStore(state => state.user.accessToken);
 
+  const getProjects = useProjectStore(state => state.getProjects);
   const deleteProject = useProjectStore(state => state.deleteProject);
   const updateProject = useProjectStore(state => state.updateProjectService);
 
@@ -22,6 +24,14 @@ const ProjectsPage: React.FC = () => {
   const [editDescription, setEditDescription] = useState('');
   const [editStartDate, setEditStartDate] = useState('');
   const [editEndDate, setEditEndDate] = useState('');
+
+  useEffect(() => {
+    if (navigator.onLine) {
+      syncOfflineRequests();
+    }
+    window.addEventListener("online", syncOfflineRequests);
+    return () => window.removeEventListener("online", syncOfflineRequests);
+  }, []);
 
   const handleDelete = async (id: string) => {
     if (!token) return;
@@ -129,17 +139,15 @@ const ProjectsPage: React.FC = () => {
 
       try {
         console.log('Fetching projects...');
-        const resp = await axios.get<Project[]>(Routes.GET_PROJECTS, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const resp = await getProjects(token);
 
-        console.log('Projects received:', resp.data);
+        console.log('Projects received:', resp);
 
         if (isMounted) {
-          if (Array.isArray(resp.data)) {
-            setProjects(resp.data);
+          if (Array.isArray(resp)) {
+            setProjects(resp);
           } else {
-            console.error('Invalid projects data format:', resp.data);
+            console.error('Invalid projects data format:', resp);
             setError('Received invalid data format from server');
           }
         }

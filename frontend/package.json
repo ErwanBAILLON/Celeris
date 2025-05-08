@@ -3,6 +3,11 @@
   "version": "0.1.1",
   "private": true,
   "dependencies": {
+    "@fullcalendar/common": "^5.11.5",
+    "@fullcalendar/daygrid": "^6.1.17",
+    "@fullcalendar/interaction": "^6.1.17",
+    "@fullcalendar/react": "^6.1.17",
+    "@fullcalendar/timegrid": "^6.1.17",
     "@reduxjs/toolkit": "^2.6.1",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -30,7 +35,7 @@
     "dev": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "build-sw": "workbox injectManifest workbox-config.js",
+    "build-sw": "echo \"Building service worker...\"",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
