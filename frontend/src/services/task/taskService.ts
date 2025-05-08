@@ -11,89 +11,59 @@ export interface Task {
   priority: string;
 }
 
-export const getTasks = async (
-  projectId: string,
-  token: string
-): Promise<Task[]> => {
-  const url = `${Routes.GET_PROJECT_BY_ID(projectId)}/tasks`;
-  const resp = await axios.get<Task[]>(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return resp.data;
-};
+class TaskService {
+  async getTasks(projectId: string, token: string): Promise<Task[] | undefined> {
+    try {
+      const url = `${Routes.GET_PROJECT_BY_ID(projectId)}/tasks`;
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-// Fonction createTask améliorée avec plus de logging et de gestion d'erreurs
-export const createTask = async (
-  projectId: string,
-  taskData: Partial<Task>,
-  token: string
-): Promise<Task | undefined> => {
-  try {
-    console.log('Creating task with data:', taskData, 'for project:', projectId);
+      return response.data || [];
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  }
 
-    const response = await axios.post<Task>(
-      `${Routes.GET_PROJECT_BY_ID(projectId)}/tasks`,
-      taskData,
-      {
+  async createTask(projectId: string, taskData: Partial<Task>, token: string): Promise<Task | undefined> {
+    try {
+      const url = `${Routes.GET_PROJECT_BY_ID(projectId)}/tasks`;
+      const response = await axios.post<Task>(url, taskData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-      }
-    );
+      });
 
-    console.log('Server response for createTask:', response);
-
-    // Vérifier si la réponse contient les données attendues
-    if (!response.data || !response.data.id) {
-      console.warn('Invalid response from server for createTask:', response.data);
-
-      // Si le serveur a répondu avec succès mais sans données valides,
-      // on crée un objet de tâche par défaut pour éviter les erreurs côté frontend
-      return {
-        id: `temp-${Date.now()}`,
-        ...taskData,
-      } as Task;
+      return response.data || undefined;
+    } catch (error) {
+      console.error('Error creating task:', error);
     }
+  }
 
-    return response.data;
-  } catch (error) {
-    console.error('Error in createTask service:', error);
+  async updateTask(projectId: string, taskId: string, taskData: Partial<Task>, token: string): Promise<Task | undefined> {
+    try {
+      const url = `${Routes.GET_PROJECT_BY_ID(projectId)}/tasks/${taskId}`;
+      const response = await axios.put<Task>(url, taskData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    // Rethrow error with enhanced context
-    if (axios.isAxiosError(error)) {
-      console.error('Server response:', error.response?.data);
+      return response.data || undefined;
+    } catch (error) {
+      console.error('Error updating task:', error);
+    }
+  }
+
+  async deleteTask(projectId: string, taskId: string, token: string): Promise<void> {
+    try {
+      const url = `${Routes.GET_PROJECT_BY_ID(projectId)}/tasks/${taskId}`;
+      await axios.delete(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (error) {
+      console.error('Error deleting task:', error);
     }
   }
 }
 
-export const updateTask = async (
-  projectId: string,
-  taskId: string,
-  taskData: {
-    name: string;
-    description: string;
-    startDate: string;
-    endDate: string;
-    status: string;
-    priority: string;
-  },
-  token: string
-): Promise<Task> => {
-  const url = `${Routes.GET_PROJECT_BY_ID(projectId)}/tasks/${taskId}`;
-  const resp = await axios.put<Task>(url, taskData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return resp.data;
-};
-
-export const deleteTask = async (
-  projectId: string,
-  taskId: string,
-  token: string
-): Promise<void> => {
-  const url = `${Routes.GET_PROJECT_BY_ID(projectId)}/tasks/${taskId}`;
-  await axios.delete<void>(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-};
+export default new TaskService();

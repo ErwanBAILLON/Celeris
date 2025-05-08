@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getProjectById, ProjectDetail } from '../services/project/projectService';
-import { getTasks, createTask, deleteTask, updateTask, Task } from '../services/task/taskService';
+import { useProjectStore, ProjectDetail } from '../store/projectStore';
+import { useTaskStore, Task } from '../store/taskStore';
 import { useUserStore } from '../store/userStore';
 
 const ProjectDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
+  const getTasks = useTaskStore(s => s.getTasks);
+  const createTask = useTaskStore(s => s.createTask);
+  const updateTask = useTaskStore(s => s.updateTaskService);
+  const deleteTask = useTaskStore(s => s.deleteTask);
+
+  const getProjectById = useProjectStore(s => s.getProjectById);
+
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

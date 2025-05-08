@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Routes } from '../utils/routes';
 import { useUserStore } from '../store/userStore';
-import { Reminder, getReminders, deleteReminder } from '../services/reminder/reminderService';
+import { useReminderStore, Reminder } from '../store/reminderStore';
 import userService from '../services/user/userService';
 
 const Header: React.FC = () => {
@@ -10,6 +10,10 @@ const Header: React.FC = () => {
   const location = useLocation();
   const user = useUserStore(s => s.user);
   const clearUser = useUserStore(s => s.clearUser);
+
+  const getReminders = useReminderStore(s => s.getReminders);
+  const deleteReminder = useReminderStore(s => s.deleteReminder);
+
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [reminderOpen, setReminderOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
