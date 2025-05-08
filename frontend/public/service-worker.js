@@ -22,7 +22,7 @@ self.addEventListener('fetch', event => {
           if (now - cachedTime > expirationTime) {
             self.registration.showNotification('Requête expirée', {
               body: 'Une requête pour "projects" a expiré.',
-              icon: '/icon.png',
+              icon: '/logo_celeris.studio.png',
             });
           }
         }
@@ -41,7 +41,7 @@ self.addEventListener('fetch', event => {
           if (now - cachedTime > expirationTime) {
             self.registration.showNotification('Requête expirée', {
               body: 'Une requête pour "reminders" a expiré.',
-              icon: '/icon.png',
+              icon: '/logo_celeris.studio.png',
             });
           }
         }
@@ -59,7 +59,7 @@ self.addEventListener('sync', event => {
         const notificationMessage = 'Les requêtes en attente ont été envoyées avec succès.';
         self.registration.showNotification('Requêtes envoyées', {
           body: notificationMessage,
-          icon: '/icon.png',
+          icon: '/logo_celeris.studio.png',
         });
       })()
     );
