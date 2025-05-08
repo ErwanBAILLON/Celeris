@@ -30,7 +30,7 @@
     "dev": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "build-sw": "workbox generateSW workbox-config.js",
+    "build-sw": "workbox injectManifest workbox-config.js",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

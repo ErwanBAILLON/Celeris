@@ -21,4 +21,10 @@ if ('serviceWorker' in navigator) {
       alert('Une nouvelle version du site est disponible. Rechargez la page pour voir les changements.');
     }
   });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/service-worker.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.error('SW registration failed:', err));
+  });
 }
