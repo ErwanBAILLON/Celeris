@@ -145,7 +145,7 @@ projectRouter.delete('/:id', authMiddleware, async (req, res) => {
 projectRouter.post('/:id/tasks', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, startDate, endDate } = req.body;
+        const { name, description, startDate, endDate, status, priority } = req.body;
         const project = await ProjectRepository.findById(id);
         if (!project) {
             res.status(404).json({ error: 'Project not found' });
@@ -156,6 +156,8 @@ projectRouter.post('/:id/tasks', authMiddleware, async (req, res) => {
         task.description = description;
         task.startDate = startDate;
         task.endDate = endDate;
+        task.status = status;
+        task.priority = priority;
         task.project = project;
         const createdTask = await TaskRepository.create(task);
         if (!createdTask) {
