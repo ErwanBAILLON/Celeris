@@ -1,11 +1,6 @@
 import { Routes } from '../../utils/routes';
 import { fetchWithOfflineSupport } from '../../utils/offlineRequests';
 
-export interface Project {
-  id: string;
-  name: string;
-  // ...autres champs si nécessaire...
-}
 
 export interface ProjectDetail {
   id: string;
@@ -16,6 +11,21 @@ export interface ProjectDetail {
 }
 
 class ProjectService {
+  async getProjects(token: string): Promise<ProjectDetail[] | undefined> {
+    try {
+      const response = await fetchWithOfflineSupport(Routes.GET_PROJECTS, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) {
+        throw new Error(`Error fetching projects: ${response.statusText}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching projects with offline support:', error);
+      return undefined;
+    }
+  }
+
   async getProjectById(id: string, token: string): Promise<ProjectDetail> {
     try {
       const response = await fetchWithOfflineSupport(Routes.GET_PROJECT_BY_ID(id), {
@@ -31,7 +41,7 @@ class ProjectService {
     }
   }
 
-  async createProject(projectData: Partial<ProjectDetail>, token: string): Promise<Project> {
+  async createProject(projectData: Partial<ProjectDetail>, token: string): Promise<ProjectDetail> {
     try {
       const response = await fetchWithOfflineSupport(Routes.CREATE_PROJECT, {
         method: 'POST',
@@ -68,7 +78,7 @@ class ProjectService {
     }
   }
 
-  async updateProject(id: string, data: Partial<ProjectDetail>, token: string): Promise<Project> {
+  async updateProject(id: string, data: Partial<ProjectDetail>, token: string): Promise<ProjectDetail> {
     try {
       const response = await fetchWithOfflineSupport(Routes.UPDATE_PROJECT(id), {
         method: 'PUT',

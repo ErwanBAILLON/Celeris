@@ -10,8 +10,13 @@ import ProjectsPage from './pages/ProjectsPage';
 import NewProjectPage from './pages/NewProjectPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
 import Header from './components/Header';
+import CalendarPage from './pages/Calendar/CalendarPage';
+import { useUserStore } from './store/userStore';
 
 const AppContent = () => {
+
+  const user = useUserStore(state => state.user);
+
   return (
     <>
       <NotificationPermission />
@@ -49,6 +54,17 @@ const AppContent = () => {
               <>
                 <Header />
                 <ProjectDetailPage />
+              </>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/calendar"
+          element={
+            <ProtectedRoute>
+              <>
+                <Header />
+                <CalendarPage token={user.accessToken || ''} />
               </>
             </ProtectedRoute>
           }

@@ -11,6 +11,7 @@ interface Project { id: string; name: string; }
 const ProjectsPage: React.FC = () => {
   const token = useUserStore(state => state.user.accessToken);
 
+  const getProjects = useProjectStore(state => state.getProjects);
   const deleteProject = useProjectStore(state => state.deleteProject);
   const updateProject = useProjectStore(state => state.updateProjectService);
 
@@ -138,17 +139,15 @@ const ProjectsPage: React.FC = () => {
 
       try {
         console.log('Fetching projects...');
-        const resp = await axios.get<Project[]>(Routes.GET_PROJECTS, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const resp = await getProjects(token);
 
-        console.log('Projects received:', resp.data);
+        console.log('Projects received:', resp);
 
         if (isMounted) {
-          if (Array.isArray(resp.data)) {
-            setProjects(resp.data);
+          if (Array.isArray(resp)) {
+            setProjects(resp);
           } else {
-            console.error('Invalid projects data format:', resp.data);
+            console.error('Invalid projects data format:', resp);
             setError('Received invalid data format from server');
           }
         }
