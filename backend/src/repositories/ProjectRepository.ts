@@ -34,4 +34,15 @@ export class ProjectRepository {
             .where("user.id = :userId", { userId })
             .getMany();
     }
+
+    static async isOwner(projectId: number, userId: number): Promise<boolean> {
+        const project = await projectRepository
+            .createQueryBuilder("project")
+            .innerJoinAndSelect("project.user", "user")
+            .where("project.id = :projectId", { projectId })
+            .andWhere("user.id = :userId", { userId })
+            .getOne();
+
+        return !!project;
+    }
 }
