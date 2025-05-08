@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { createProject } from '../services/project/projectService';
+import { useProjectStore } from '../store/projectStore';
 import { useUserStore } from '../store/userStore';
 
 const NewProjectPage: React.FC = () => {
+  const createProject = useProjectStore(state => state.createProject);
+
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -56,10 +58,10 @@ const NewProjectPage: React.FC = () => {
           </svg>
           Back to Projects
         </Link>
-        
+
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-800 mb-6">Create New Project</h1>
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">Project Name</label>
@@ -72,7 +74,7 @@ const NewProjectPage: React.FC = () => {
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
               />
             </div>
-            
+
             <div className="space-y-2">
               <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
               <textarea
@@ -83,7 +85,7 @@ const NewProjectPage: React.FC = () => {
                 className="w-full p-3 border border-gray-300 rounded-lg h-32 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
               />
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Start Date</label>
@@ -95,7 +97,7 @@ const NewProjectPage: React.FC = () => {
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">End Date</label>
                 <input
@@ -107,13 +109,13 @@ const NewProjectPage: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             {error && (
               <div className="bg-red-50 text-red-700 p-4 rounded-lg">
                 <p>{error}</p>
               </div>
             )}
-            
+
             <div className="pt-4">
               <button
                 type="submit"

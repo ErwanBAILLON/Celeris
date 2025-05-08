@@ -9,7 +9,6 @@ class UserService {
       return response.data;
     } catch (error) {
       console.error('Error during registration:', error);
-      throw error;
     }
   }
 
@@ -19,7 +18,6 @@ class UserService {
       return response.data;
     } catch (error) {
       console.error('Error during login:', error);
-      throw error;
     }
   }
 
@@ -29,7 +27,6 @@ class UserService {
       return response.data;
     } catch (error) {
       console.error('Error during logout:', error);
-      throw error;
     }
   }
 }

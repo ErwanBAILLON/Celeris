@@ -10,7 +10,7 @@ const Login = () => {
   const navigate = useNavigate();
   const login = useUserStore((state) => state.login);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const username = (e.currentTarget[0] as HTMLInputElement).value;
@@ -25,7 +25,7 @@ const Login = () => {
     const userData = { username, password };
     console.log("Logging in user:", userData);
     try {
-      login({ username, password });
+      await login({ username, password });
       console.log("User logged in successfully");
       navigate("/home");
     } catch (error) {
@@ -49,7 +49,7 @@ const Login = () => {
             placeholder="Password"
             className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <button className="p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+          <button type="submit" className="p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
             Login
           </button>
           <Link to="/register" className="p-3 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition text-center">

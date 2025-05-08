@@ -3,12 +3,16 @@ import axios from 'axios';
 import { Routes } from '../utils/routes';
 import { Link } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
-import { deleteProject, updateProject } from '../services/project/projectService';
+import { useProjectStore } from '../store/projectStore';
 
 interface Project { id: string; name: string; }
 
 const ProjectsPage: React.FC = () => {
   const token = useUserStore(state => state.user.accessToken);
+
+  const deleteProject = useProjectStore(state => state.deleteProject);
+  const updateProject = useProjectStore(state => state.updateProjectService);
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,13 +38,13 @@ const ProjectsPage: React.FC = () => {
     try {
       setEditingProject(proj);
       setEditName(proj.name || '');
-      
+
       const description = (proj as any)?.description;
       setEditDescription(typeof description === 'string' ? description : '');
-      
+
       let startDate = '';
       let endDate = '';
-      
+
       try {
         if ((proj as any)?.startDate) {
           const date = new Date((proj as any).startDate);
@@ -51,7 +55,7 @@ const ProjectsPage: React.FC = () => {
       } catch (e) {
         console.warn('Invalid start date format:', e);
       }
-      
+
       try {
         if ((proj as any)?.endDate) {
           const date = new Date((proj as any).endDate);
@@ -62,7 +66,7 @@ const ProjectsPage: React.FC = () => {
       } catch (e) {
         console.warn('Invalid end date format:', e);
       }
-      
+
       setEditStartDate(startDate);
       setEditEndDate(endDate);
       setShowEditModal(true);
@@ -74,10 +78,10 @@ const ProjectsPage: React.FC = () => {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token || !editingProject) return;
-    
+
     try {
       let startDateObj, endDateObj;
-      
+
       try {
         startDateObj = editStartDate ? new Date(editStartDate) : new Date();
         if (isNaN(startDateObj.getTime())) throw new Error('Invalid start date');
@@ -85,7 +89,7 @@ const ProjectsPage: React.FC = () => {
         setError('Invalid start date format');
         return;
       }
-      
+
       try {
         endDateObj = editEndDate ? new Date(editEndDate) : new Date();
         if (isNaN(endDateObj.getTime())) throw new Error('Invalid end date');
@@ -93,16 +97,18 @@ const ProjectsPage: React.FC = () => {
         setError('Invalid end date format');
         return;
       }
-      
+
       const payload = {
         name: editName.trim(),
         description: editDescription.trim(),
         startDate: startDateObj.toISOString(),
         endDate: endDateObj.toISOString(),
       };
-      
+
       const updated = await updateProject(editingProject.id, payload, token);
-      setProjects(prev => prev.map(p => p.id === updated.id ? updated : p));
+      if (updated) {
+        setProjects(prev => prev.map(p => (p.id === updated.id ? updated : p)));
+      }
       setShowEditModal(false);
       setEditingProject(null);
       setError(null);
@@ -114,21 +120,21 @@ const ProjectsPage: React.FC = () => {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const fetchProjects = async () => {
       if (!token) {
         setLoading(false);
         return;
       }
-      
+
       try {
         console.log('Fetching projects...');
         const resp = await axios.get<Project[]>(Routes.GET_PROJECTS, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        
+
         console.log('Projects received:', resp.data);
-        
+
         if (isMounted) {
           if (Array.isArray(resp.data)) {
             setProjects(resp.data);
@@ -148,9 +154,9 @@ const ProjectsPage: React.FC = () => {
         }
       }
     };
-    
+
     fetchProjects();
-    
+
     return () => {
       isMounted = false;
     };
@@ -181,7 +187,7 @@ const ProjectsPage: React.FC = () => {
             <p>{error}</p>
           </div>
         )}
-        
+
         <header className="mb-12 text-center">
           <h1 className="text-4xl font-bold text-blue-800 mb-4">My Projects</h1>
           <p className="text-lg text-gray-600 mb-8">Manage and organize all your projects in one place</p>
@@ -226,10 +232,10 @@ const ProjectsPage: React.FC = () => {
                   <Link to={`/projects/${p.id}`} className="block">
                     <h2 className="text-xl font-semibold text-gray-800 mb-3 hover:text-blue-600 transition">{p.name}</h2>
                     <p className="text-sm text-gray-500 mb-4">
-                      {(p as any).description ? 
-                        (p as any).description.length > 100 ? 
-                          `${(p as any).description.substring(0, 100)}...` : 
-                          (p as any).description 
+                      {(p as any).description ?
+                        (p as any).description.length > 100 ?
+                          `${(p as any).description.substring(0, 100)}...` :
+                          (p as any).description
                         : 'No description provided'}
                     </p>
                     <div className="flex items-center text-gray-600 text-sm mb-1">
@@ -288,7 +294,7 @@ const ProjectsPage: React.FC = () => {
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <label htmlFor="editDescription" className="block text-sm font-medium text-gray-700">Description</label>
                   <textarea
@@ -299,7 +305,7 @@ const ProjectsPage: React.FC = () => {
                     placeholder="Description"
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label htmlFor="editStartDate" className="block text-sm font-medium text-gray-700">Start Date</label>
@@ -311,7 +317,7 @@ const ProjectsPage: React.FC = () => {
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label htmlFor="editEndDate" className="block text-sm font-medium text-gray-700">End Date</label>
                     <input
@@ -323,7 +329,7 @@ const ProjectsPage: React.FC = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
                     type="button"
