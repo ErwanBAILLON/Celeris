@@ -43,9 +43,14 @@ projectRouter.get('/', authMiddleware, async (req, res) => {
 projectRouter.get('/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
+        const userId = req.user!.userId;
         const project = await ProjectRepository.findById(id);
         if (!project) {
             res.status(404).json({ error: 'Project not found' });
+            return;
+        }
+        if (project.user.id !== userId) {
+            res.status(403).json({ error: 'Forbidden' });
             return;
         }
         const exportedProject = projectExporter(project);
@@ -146,12 +151,20 @@ projectRouter.post('/:id/tasks', authMiddleware, async (req, res) => {
             res.status(404).json({ error: 'Project not found' });
             return;
         }
+        const user = await UserRepository.findById(userId);
+        if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+        }
         const task = new Task();
         task.name = name;
         task.description = description;
         task.startDate = startDate;
         task.endDate = endDate;
         task.project = project;
+        task.status = status;
+        task.priority = priority;
+        task.user = user;
         const createdTask = await TaskRepository.create(task);
         if (!createdTask) {
             res.status(500).json({ error: 'Failed to create task' });
@@ -169,9 +182,14 @@ projectRouter.post('/:id/tasks', authMiddleware, async (req, res) => {
 projectRouter.get('/:id/tasks', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
+        const userId = req.user!.userId;
         const project = await ProjectRepository.findById(id);
         if (!project) {
             res.status(404).json({ error: 'Project not found' });
+            return;
+        }
+        if (project.user.id !== userId) {
+            res.status(403).json({ error: 'Forbidden' });
             return;
         }
         const tasks = await TaskRepository.findByProjectId(id);

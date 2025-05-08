@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Routes } from '../utils/routes';
 import { useUserStore } from '../store/userStore';
 import { useReminderStore, Reminder } from '../store/reminderStore';
 import userService from '../services/user/userService';
+import { getOfflineRequests } from '../utils/offlineRequests';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useUserStore(s => s.user);
   const clearUser = useUserStore(s => s.clearUser);
+  const getOffRequests = getOfflineRequests();
 
   const getReminders = useReminderStore(s => s.getReminders);
   const deleteReminder = useReminderStore(s => s.deleteReminder);
@@ -19,6 +20,9 @@ const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [offlineRequestsOpen, setOfflineRequestsOpen] = useState(false);
+  const [offlineRequests, setOfflineRequests] = useState<any[]>([]);
+  const offlineDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -33,10 +37,69 @@ const Header: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const fetchOfflineRequests = async () => {
+      try {
+        const requests = await getOfflineRequests();
+        setOfflineRequests(requests || []);
+      } catch (err) {
+        console.error('Error fetching offline requests:', err);
+      }
+    };
+
+    fetchOfflineRequests();
+    const interval = setInterval(fetchOfflineRequests, 30000);
+    return () => clearInterval(interval);
+  }, [isOnline]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (offlineDropdownRef.current && !offlineDropdownRef.current.contains(event.target as Node)) {
+        setOfflineRequestsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    setReminderOpen(false);
+    setOfflineRequestsOpen(false);
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  const calculateTimeRemaining = (timestamp: string) => {
+    const expirationTime = 24 * 60 * 60 * 1000;
+    const createdTime = new Date(timestamp).getTime();
+    const now = Date.now();
+    const timeElapsed = now - createdTime;
+    const timeRemaining = expirationTime - timeElapsed;
+
+    if (timeRemaining <= 0) {
+      return "Expired";
+    }
+
+    const hours = Math.floor(timeRemaining / (60 * 60 * 1000));
+    const minutes = Math.floor((timeRemaining % (60 * 60 * 1000)) / (60 * 1000));
+
+    return `${hours}h ${minutes}m`;
+  };
+
+  const getBodyName = (bodyString: string) => {
+    try {
+      const parsed = JSON.parse(bodyString);
+      return parsed.title || parsed.name || "Unnamed";
+    } catch (e) {
+      return "Invalid body";
+    }
+  };
+
   const handleLogout = async () => {
     try {
       if (user.accessToken) {
-        // Utiliser le service utilisateur au lieu d'axios directement
         await userService.logout();
       }
     } catch (e) {
@@ -47,20 +110,16 @@ const Header: React.FC = () => {
     }
   };
 
-  // Ajouter une fonction pour supprimer un rappel qui utilise le service
   const handleDeleteReminder = async (id: string, event: React.MouseEvent) => {
-    event.stopPropagation(); // Empêcher le click de se propager
+    event.stopPropagation();
 
     if (!user.accessToken) return;
 
     try {
-      // Utiliser le service au lieu d'axios directement
       await deleteReminder(id, user.accessToken);
 
-      // Mettre à jour la liste des rappels
       setReminders(prev => prev.filter(r => r.id !== id));
 
-      // Notification de succès
       const notificationElement = document.createElement('div');
       notificationElement.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
       notificationElement.textContent = 'Rappel supprimé avec succès';
@@ -75,7 +134,6 @@ const Header: React.FC = () => {
     } catch (err) {
       console.error('Error deleting reminder:', err);
 
-      // Notification d'erreur
       const errorElement = document.createElement('div');
       errorElement.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
       errorElement.textContent = 'Erreur lors de la suppression du rappel';
@@ -89,7 +147,6 @@ const Header: React.FC = () => {
     }
   };
 
-  // Fermer le dropdown quand on clique en dehors
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -103,19 +160,16 @@ const Header: React.FC = () => {
     };
   }, []);
 
-  // Fermer le dropdown quand on change de page
   useEffect(() => {
     setReminderOpen(false);
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
-  // Récupérer les rappels en utilisant le service
   useEffect(() => {
     if (!user.accessToken) return;
 
     const fetchReminders = async () => {
       try {
-        // Utiliser le service au lieu d'axios directement
         const data = await getReminders(user.accessToken!);
         if (!data) {
           console.error('No reminders found or error fetching reminders');
@@ -130,7 +184,6 @@ const Header: React.FC = () => {
     fetchReminders();
   }, [user.accessToken]);
 
-  // Formatage de la date pour l'affichage
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
@@ -151,14 +204,12 @@ const Header: React.FC = () => {
     }
   };
 
-  // Compter les rappels non lus
   const unreadCount = reminders.filter(r => !r.completed).length;
 
   return (
     <header className="bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-md">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
           <Link to="/home" className="text-2xl font-bold flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mr-2" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
@@ -166,7 +217,6 @@ const Header: React.FC = () => {
             <span className="hidden sm:inline">Celeris</span>
           </Link>
 
-          {/* Navigation - Desktop */}
           <nav className="hidden md:flex space-x-8">
             <Link
               to="/home"
@@ -190,9 +240,7 @@ const Header: React.FC = () => {
             </Link>
           </nav>
 
-          {/* Actions - Desktop */}
           <div className="hidden md:flex items-center space-x-6">
-            {/* Bell icon with badge */}
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setReminderOpen(prev => !prev)}
@@ -209,7 +257,6 @@ const Header: React.FC = () => {
                 )}
               </button>
 
-              {/* Dropdown menu for reminders */}
               {reminderOpen && (
                 <div className="absolute right-0 mt-3 w-80 bg-white text-gray-800 rounded-lg shadow-xl z-50 overflow-hidden transform transition-all duration-200 ease-out origin-top-right">
                   <div className="p-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium flex justify-between items-center">
@@ -233,7 +280,6 @@ const Header: React.FC = () => {
                             {reminder.title}
                           </p>
 
-                          {/* Bouton de suppression */}
                           <button
                             onClick={(e) => handleDeleteReminder(reminder.id, e)}
                             className="absolute top-3 right-3 p-1 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -261,6 +307,70 @@ const Header: React.FC = () => {
               )}
             </div>
 
+            <div className="relative" ref={offlineDropdownRef}>
+              <button
+                onClick={() => setOfflineRequestsOpen(prev => !prev)}
+                className="p-2 rounded-full transition-colors hover:bg-blue-600/50 focus:outline-none relative"
+                aria-label="Offline Requests"
+                title="Offline Requests"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                </svg>
+                {offlineRequests.length > 0 && (
+                  <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-500 text-xs text-white font-bold">
+                    {offlineRequests.length}
+                  </span>
+                )}
+              </button>
+
+              {offlineRequestsOpen && (
+                <div className="absolute right-0 mt-3 w-80 bg-white text-gray-800 rounded-lg shadow-xl z-50 overflow-hidden transform transition-all duration-200 ease-out origin-top-right">
+                  <div className="p-3 bg-gradient-to-r from-orange-500 to-orange-400 text-white font-medium flex justify-between items-center">
+                    <h3>Offline Requests</h3>
+                    <span className="bg-white text-orange-500 rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold">
+                      {offlineRequests.length}
+                    </span>
+                  </div>
+
+                  <div className="max-h-96 overflow-y-auto divide-y divide-gray-100">
+                    {offlineRequests.length ? (
+                      offlineRequests.map(request => (
+                        <div key={request.id} className="p-4 hover:bg-gray-50 transition-colors relative">
+                          <div className="flex justify-between items-start">
+                            <h4 className="text-gray-800 font-medium flex items-center">
+                              <span className={`inline-block px-2 py-1 text-xs rounded-full mr-2 ${
+                                request.method === 'POST' ? 'bg-green-100 text-green-800' :
+                                request.method === 'PUT' ? 'bg-blue-100 text-blue-800' :
+                                request.method === 'DELETE' ? 'bg-red-100 text-red-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {request.method}
+                              </span>
+                              {getBodyName(request.body)}
+                            </h4>
+                          </div>
+                          <div className="mt-2 text-sm">
+                            <div className="flex justify-between text-gray-600">
+                              <span>Expires in:</span>
+                              <span className="font-medium">{calculateTimeRemaining(request.timestamp)}</span>
+                            </div>
+                            <div className="mt-1 text-xs text-gray-500 truncate">
+                              {request.url}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center text-gray-500">
+                        <p>No pending offline requests</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div title={isOnline ? 'Online' : 'Offline'} className="p-2">
               {isOnline ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -278,7 +388,6 @@ const Header: React.FC = () => {
               )}
             </div>
 
-            {/* User profile and logout */}
             <div className="relative group">
               <button className="flex items-center space-x-2 focus:outline-none">
                 <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-medium">
@@ -306,9 +415,7 @@ const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile menu button */}
           <div className="flex md:hidden items-center space-x-3">
-            {/* Bell icon for mobile */}
             <button
               onClick={() => setReminderOpen(prev => !prev)}
               className="p-2 rounded-full transition-colors hover:bg-blue-600/50 focus:outline-none relative"
@@ -320,6 +427,21 @@ const Header: React.FC = () => {
               {unreadCount > 0 && (
                 <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white font-bold animate-pulse">
                   {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setOfflineRequestsOpen(prev => !prev)}
+              className="p-2 rounded-full transition-colors hover:bg-blue-600/50 focus:outline-none relative"
+              aria-label="Offline Requests"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+              </svg>
+              {offlineRequests.length > 0 && (
+                <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-500 text-xs text-white font-bold">
+                  {offlineRequests.length > 9 ? '9+' : offlineRequests.length}
                 </span>
               )}
             </button>
@@ -358,7 +480,6 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
       <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${mobileMenuOpen ? 'max-h-60' : 'max-h-0'}`}>
         <div className="container mx-auto px-4 pb-3 space-y-1">
           <Link to="/home" className="block py-2 px-3 rounded-md hover:bg-blue-600/40">
@@ -383,7 +504,6 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile reminders dropdown */}
       {reminderOpen && (
         <div className="md:hidden absolute top-16 left-0 right-0 bg-white shadow-lg z-50 max-h-96 overflow-y-auto" ref={dropdownRef}>
           <div className="p-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium">
@@ -399,7 +519,6 @@ const Header: React.FC = () => {
                   </div>
                   <p className="text-sm text-gray-600 mt-1">{reminder.title}</p>
 
-                  {/* Bouton de suppression pour mobile */}
                   <button
                     onClick={(e) => handleDeleteReminder(reminder.id, e)}
                     className="absolute top-4 right-4 p-1 text-gray-400 hover:text-red-500 rounded-full"
@@ -418,6 +537,43 @@ const Header: React.FC = () => {
           <Link to="/reminders" className="block p-3 bg-gray-50 text-center text-blue-600 font-medium">
             See all reminders
           </Link>
+        </div>
+      )}
+
+      {offlineRequestsOpen && (
+        <div className="md:hidden absolute top-16 left-0 right-0 bg-white shadow-lg z-50 max-h-96 overflow-y-auto" ref={offlineDropdownRef}>
+          <div className="p-3 bg-gradient-to-r from-orange-500 to-orange-400 text-white font-medium">
+            <h3>Offline Requests ({offlineRequests.length})</h3>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {offlineRequests.length ? (
+              offlineRequests.map(request => (
+                <div key={request.id} className="p-4 hover:bg-gray-50 relative">
+                  <div className="flex justify-between items-start">
+                    <h4 className="text-gray-800 font-medium flex items-center">
+                      <span className={`inline-block px-2 py-1 text-xs rounded-full mr-2 ${
+                        request.method === 'POST' ? 'bg-green-100 text-green-800' :
+                        request.method === 'PUT' ? 'bg-blue-100 text-blue-800' :
+                        request.method === 'DELETE' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {request.method}
+                      </span>
+                      {getBodyName(request.body)}
+                    </h4>
+                  </div>
+                  <div className="mt-2 text-sm">
+                    <div className="flex justify-between text-gray-600">
+                      <span>Expires in:</span>
+                      <span className="font-medium">{calculateTimeRemaining(request.timestamp)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-4 text-center text-gray-500">No pending offline requests</div>
+            )}
+          </div>
         </div>
       )}
     </header>

@@ -19,8 +19,6 @@ const AppContent = () => {
 
   return (
     <>
-      <NotificationPermission />
-      <NetworkStatusNotification />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/register" element={<Register />} />

@@ -102,18 +102,12 @@ const HomePage = () => {
                 <Link 
                   to="/register" 
                   className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 text-center font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                  onClick={(e) => {
-                    console.log("Register button clicked");
-                  }}
                 >
                   Get Started
                 </Link>
                 <Link 
                   to="/login" 
                   className="px-8 py-3 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition duration-300 text-center font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                  onClick={(e) => {
-                    console.log("Sign In button clicked");
-                  }}
                 >
                   Sign In
                 </Link>

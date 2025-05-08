@@ -4,16 +4,11 @@ export function register() {
       navigator.serviceWorker
         .register('/service-worker.js')
         .then((registration) => {
-          console.log('Service Worker registered with Workbox:', registration);
-          // Affiche explicitement la propriété "scope"
-          console.log('Service Worker scope:', registration.scope);
-
           registration.onupdatefound = () => {
             const installingWorker = registration.installing;
             if (installingWorker) {
               installingWorker.onstatechange = () => {
                 if (installingWorker.state === 'installed') {
-                  console.log('New version available, notifying client...');
                   // Envoi du message avec l'opérateur optionnel pour éviter les erreurs
                   navigator.serviceWorker.controller?.postMessage({
                     type: 'NEW_VERSION_AVAILABLE',
