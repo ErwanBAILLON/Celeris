@@ -30,7 +30,7 @@ const taskExporter: (task: Task) => object = (task: Task) => {
 
 projectRouter.get('/', authMiddleware, async (req, res) => {
     try {
-        const { userId } = req.user!;
+        const userId = req.user!.userId;
         const projects = await ProjectRepository.findByUserId(userId);
         const exportedProjects = projects.map(projectExporter);
         res.status(200).json(exportedProjects);
@@ -65,7 +65,7 @@ projectRouter.get('/:id', authMiddleware, async (req, res) => {
 
 projectRouter.post('/', authMiddleware, async (req, res) => {
     try {
-        const { userId } = req.user!;
+        const userId = req.user!.userId;
         const user = await UserRepository.findById(userId);
         if (!user) {
             res.status(404).json({ error: 'User not found' });
