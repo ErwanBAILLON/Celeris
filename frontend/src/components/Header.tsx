@@ -178,6 +178,16 @@ const Header: React.FC = () => {
             >
               Projects
             </Link>
+            <Link
+              to="/calendar"
+              className={`py-1 hover:text-white transition-all duration-200 border-b-2 ${
+                location.pathname === '/calendar'
+                  ? 'border-white text-white font-medium'
+                  : 'border-transparent hover:border-white/50'
+              }`}
+            >
+              Calendar
+            </Link>
           </nav>
 
           {/* Actions - Desktop */}
@@ -203,7 +213,7 @@ const Header: React.FC = () => {
               {reminderOpen && (
                 <div className="absolute right-0 mt-3 w-80 bg-white text-gray-800 rounded-lg shadow-xl z-50 overflow-hidden transform transition-all duration-200 ease-out origin-top-right">
                   <div className="p-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium flex justify-between items-center">
-                    <h3>Rappels</h3>
+                    <h3>Reminders</h3>
                     <span className="bg-white text-blue-600 rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold">
                       {reminders.length}
                     </span>
@@ -237,14 +247,14 @@ const Header: React.FC = () => {
                       ))
                     ) : (
                       <div className="p-4 text-center text-gray-500">
-                        <p>Aucun rappel pour le moment</p>
+                        <p>No reminder</p>
                       </div>
                     )}
                   </div>
 
                   <div className="p-3 bg-gray-50 text-center border-t border-gray-100">
                     <Link to="/reminders" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                      Voir tous les rappels
+                      See all reminders
                     </Link>
                   </div>
                 </div>
@@ -289,7 +299,7 @@ const Header: React.FC = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
                     </svg>
-                    <span>Se déconnecter</span>
+                    <span>Logout</span>
                   </button>
                 </div>
               </div>
@@ -352,10 +362,13 @@ const Header: React.FC = () => {
       <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${mobileMenuOpen ? 'max-h-60' : 'max-h-0'}`}>
         <div className="container mx-auto px-4 pb-3 space-y-1">
           <Link to="/home" className="block py-2 px-3 rounded-md hover:bg-blue-600/40">
-            Projets
+            Projects
+          </Link>
+          <Link to="/calendar" className="block py-2 px-3 rounded-md hover:bg-blue-600/40">
+            Calendar
           </Link>
           <Link to="/reminders" className="block py-2 px-3 rounded-md hover:bg-blue-600/40">
-            Rappels
+            Reminders
           </Link>
           <hr className="border-blue-400/30 my-2" />
           <button
@@ -365,7 +378,7 @@ const Header: React.FC = () => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
             </svg>
-            Se déconnecter
+            Logout
           </button>
         </div>
       </div>
@@ -374,7 +387,7 @@ const Header: React.FC = () => {
       {reminderOpen && (
         <div className="md:hidden absolute top-16 left-0 right-0 bg-white shadow-lg z-50 max-h-96 overflow-y-auto" ref={dropdownRef}>
           <div className="p-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium">
-            <h3>Rappels ({reminders.length})</h3>
+            <h3>Reminders ({reminders.length})</h3>
           </div>
           <div className="divide-y divide-gray-100">
             {reminders.length ? (
@@ -390,7 +403,7 @@ const Header: React.FC = () => {
                   <button
                     onClick={(e) => handleDeleteReminder(reminder.id, e)}
                     className="absolute top-4 right-4 p-1 text-gray-400 hover:text-red-500 rounded-full"
-                    title="Supprimer ce rappel"
+                    title="Delete this reminder"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -399,11 +412,11 @@ const Header: React.FC = () => {
                 </div>
               ))
             ) : (
-              <div className="p-4 text-center text-gray-500">Aucun rappel</div>
+              <div className="p-4 text-center text-gray-500">No reminder</div>
             )}
           </div>
           <Link to="/reminders" className="block p-3 bg-gray-50 text-center text-blue-600 font-medium">
-            Voir tous les rappels
+            See all reminders
           </Link>
         </div>
       )}
