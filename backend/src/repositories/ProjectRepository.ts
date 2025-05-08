@@ -23,6 +23,7 @@ export class ProjectRepository {
     static async findById(id: string): Promise<Project | null> {
         return projectRepository
             .createQueryBuilder("project")
+            .leftJoinAndSelect("project.user", "user")
             .where("project.id = :id", { id })
             .getOne();
     }
