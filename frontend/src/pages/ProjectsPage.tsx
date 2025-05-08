@@ -4,6 +4,7 @@ import { Routes } from '../utils/routes';
 import { Link } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
 import { useProjectStore } from '../store/projectStore';
+import { syncOfflineRequests } from '../utils/offlineRequests';
 
 interface Project { id: string; name: string; }
 
@@ -22,6 +23,14 @@ const ProjectsPage: React.FC = () => {
   const [editDescription, setEditDescription] = useState('');
   const [editStartDate, setEditStartDate] = useState('');
   const [editEndDate, setEditEndDate] = useState('');
+
+  useEffect(() => {
+    if (navigator.onLine) {
+      syncOfflineRequests();
+    }
+    window.addEventListener("online", syncOfflineRequests);
+    return () => window.removeEventListener("online", syncOfflineRequests);
+  }, []);
 
   const handleDelete = async (id: string) => {
     if (!token) return;
