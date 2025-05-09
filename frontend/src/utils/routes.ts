@@ -1,6 +1,6 @@
 export class Routes {
-  // static readonly BASE_URL = 'https://api.celeris.studio';
-  static readonly BASE_URL = 'http://localhost:3004';
+  static readonly BASE_URL = 'https://api.celeris.studio';
+  // static readonly BASE_URL = 'http://localhost:3004';
 
   // USER
   static readonly LOGIN = `${Routes.BASE_URL}/auth/login`;
