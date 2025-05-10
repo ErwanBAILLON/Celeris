@@ -3,14 +3,13 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
 import { useReminderStore, Reminder } from '../store/reminderStore';
 import userService from '../services/user/userService';
-import { getOfflineRequests } from '../utils/offlineRequests';
+import { getOfflineRequests, purgeExpiredRequests } from '../utils/offlineRequests';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useUserStore(s => s.user);
   const clearUser = useUserStore(s => s.clearUser);
-  const getOffRequests = getOfflineRequests();
 
   const getReminders = useReminderStore(s => s.getReminders);
   const deleteReminder = useReminderStore(s => s.deleteReminder);
@@ -23,6 +22,18 @@ const Header: React.FC = () => {
   const [offlineRequestsOpen, setOfflineRequestsOpen] = useState(false);
   const [offlineRequests, setOfflineRequests] = useState<any[]>([]);
   const offlineDropdownRef = useRef<HTMLDivElement>(null);
+
+  const purgeExpiredRqs = async () => {
+    purgeExpiredRequests();
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      purgeExpiredRqs();
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);

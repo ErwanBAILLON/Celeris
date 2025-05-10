@@ -31,6 +31,30 @@ export async function getOfflineRequests() {
   return data
 }
 
+export const purgeExpiredRequests = async () => {
+  const db = await openDB();
+  const tx = db.transaction("requests", "readwrite");
+  const store = tx.objectStore("requests");
+  const now = Date.now();
+  const expirationTime = 24 * 60 * 60 * 1000; // 1 day in ms
+  const req = store.openCursor();
+  req.onsuccess = () => {
+    const cursor = req.result;
+    if (cursor) {
+      const request = cursor.value;
+      if (now - new Date(request.timestamp).getTime() > expirationTime) {
+        store.delete(request.id);
+        generateNotication(request.method, `La requête ${request.body.parse().title} a expiré.`);
+      }
+      cursor.continue();
+    }
+  };
+  req.onerror = () => {
+    console.error("Error purging expired requests:", req.error);
+  };
+  await new Promise(resolve => { tx.oncomplete = resolve; });
+};
+
 const generateNotication = (method: 'GET' | 'POST' | 'PUT' | 'DELETE', message: string) => {
   if (Notification.permission === 'granted') {
     new Notification(`Requête ${method}`, {
