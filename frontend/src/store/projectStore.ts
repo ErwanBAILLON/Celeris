@@ -107,12 +107,26 @@ export const useProjectStore = create<ProjectStore>()(
       updateProjectService: async (id, data, token) => {
         try {
           const updatedProject = await ProjectService.updateProject(id, data, token);
-          if (!updatedProject) {
-            throw new Error('Error updating project: Project not found or update failed.');
+          const offline: any = updatedProject;
+          if (!updatedProject || offline?.offline === true) {
+            const existingProject = get().projects.find((project) => String(project.id) === String(id));
+            if (existingProject) {
+              const updatedProject: ProjectDetail = {
+                ...existingProject,
+                ...data,
+              };
+              set((state) => ({
+                projects: state.projects.map((project) =>
+                  String(project.id) === String(id) ? updatedProject : project
+                ),
+              }));
+              return updatedProject;
+            }
+            return undefined;
           }
           set((state) => ({
             projects: state.projects.map((project) =>
-              project.id === id ? { ...project, ...updatedProject } : project
+              String(project.id) === String(id) ? { ...project, ...updatedProject } : project
             ),
           }));
           return updatedProject;

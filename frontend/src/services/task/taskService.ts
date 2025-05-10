@@ -92,7 +92,8 @@ class TaskService {
       if (!response.ok) {
         throw new Error(`Network response was not ok: ${response.statusText}`);
       }
-      return await response.json();
+      const res = await response.json();
+      return res;
     } catch (error) {
       console.error('Error updating task with fetch:', error);
       return undefined;
