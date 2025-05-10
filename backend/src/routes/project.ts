@@ -93,6 +93,41 @@ projectRouter.post('/', authMiddleware, async (req, res) => {
     }
 });
 
+projectRouter.get('/all', authMiddleware, async (req, res) => {
+    try {
+        const { userId } = req.user!;
+        const getAllProjects = await ProjectRepository.findByUserId(userId);
+        if (!getAllProjects) {
+            res.status(404).json({ error: 'No projects found' });
+            return;
+        }
+        const getAllTasks = await TaskRepository.findByUserId(userId);
+        if (!getAllTasks) {
+            res.status(404).json({ error: 'No tasks found' });
+            return;
+        }
+        const mapTasks = getAllTasks.map(task => {
+            return {
+                id: task.id,
+                name: task.name,
+                description: task.description,
+                startDate: task.startDate,
+                endDate: task.endDate,
+                status: task.status,
+                priority: task.priority,
+                tags: task.tags,
+                projectId: task.project.id,
+            }
+        });
+        res.status(200).json(mapTasks);
+        return;
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+        return;
+    }
+});
+
 projectRouter.put('/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;

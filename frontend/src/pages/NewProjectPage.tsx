@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useProjectStore } from '../store/projectStore';
 import { useUserStore } from '../store/userStore';
+import { storeOfflineRequest } from '../utils/offlineRequests';
+import { Routes } from '../utils/routes';
 
 const NewProjectPage: React.FC = () => {
-  const createProject = useProjectStore(state => state.createProject);
+  const createProject = useProjectStore(s => s.createProject);
+  const addProject = useProjectStore(s => s.addProject);
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -13,7 +16,7 @@ const NewProjectPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const token = useUserStore(state => state.user.accessToken);
+  const token = useUserStore(s => s.user.accessToken);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,18 +32,33 @@ const NewProjectPage: React.FC = () => {
       setError('Authentication required');
       return;
     }
+
+    const payload = {
+      name,
+      description,
+      startDate: new Date(startDate).toISOString(),
+      endDate: new Date(endDate).toISOString(),
+    };
+
+    if (!navigator.onLine) {
+      const tempId = `temp-${Date.now()}`;
+      const temp = { id: tempId, ...payload };
+      addProject(temp);
+      await storeOfflineRequest(
+        `${Routes.BASE_URL}/projects`,
+        JSON.stringify(payload),
+        'POST',
+        { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        tempId
+      );
+      navigate('/home');
+      return;
+    }
+
     try {
       setLoading(true);
-      await createProject(
-        {
-          name,
-          description,
-          startDate: new Date(startDate).toISOString(),
-          endDate: new Date(endDate).toISOString(),
-        },
-        token
-      );
-      navigate(`/home`);
+      await createProject(payload, token);
+      navigate('/home');
     } catch (err) {
       console.error(err);
       setError('Failed to create project');

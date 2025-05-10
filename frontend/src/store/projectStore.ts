@@ -68,11 +68,14 @@ export const useProjectStore = create<ProjectStore>()(
           const data = await ProjectService.getProjectById(id, token);
           if (!data) {
             console.error('Error fetching project by ID:', data);
-            return undefined;
           }
           return data;
         } catch (error) {
-          console.error('Error fetching project by ID:', error);
+          const projects = get().projects;
+          const project = projects.find((project) => String(project.id) === id);
+          if (project) {
+            return project;
+          }
           return undefined;
         }
       },

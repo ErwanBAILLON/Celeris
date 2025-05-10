@@ -14,6 +14,7 @@ const ProjectsPage: React.FC = () => {
   const getProjects = useProjectStore(state => state.getProjects);
   const deleteProject = useProjectStore(state => state.deleteProject);
   const updateProject = useProjectStore(state => state.updateProjectService);
+  const storedProjects = useProjectStore.getState().projects;
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -143,15 +144,15 @@ const ProjectsPage: React.FC = () => {
         if (isMounted) {
           if (Array.isArray(resp)) {
             setProjects(resp);
+            setError(null);
           } else {
-            console.error('Invalid projects data format:', resp);
-            setError('Received invalid data format from server');
+            setProjects(storedProjects);
           }
         }
       } catch (err) {
         console.error('Error fetching projects:', err);
         if (isMounted) {
-          setError('Failed to load projects. Please try again later.');
+          setProjects(storedProjects);
         }
       } finally {
         if (isMounted) {
