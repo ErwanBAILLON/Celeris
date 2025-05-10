@@ -20,6 +20,15 @@ export class TaskRepository {
         }
     }
 
+    static async findByUserId(userId: number): Promise<Task[]> {
+        return taskRepository
+            .createQueryBuilder("task")
+            .innerJoinAndSelect("task.project", "project")
+            .innerJoinAndSelect("project.user", "user")
+            .where("user.id = :userId", { userId })
+            .getMany();
+    }
+
     static async findById(id: string): Promise<Task | null> {
         return taskRepository
             .createQueryBuilder("task")
