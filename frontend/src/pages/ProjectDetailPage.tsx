@@ -14,6 +14,7 @@ const ProjectDetailPage: React.FC = () => {
   const deleteTask = useTaskStore(s => s.deleteTask);
 
   const getProjectById = useProjectStore(s => s.getProjectById);
+  const cachedProjects = useProjectStore(s => s.projects);
 
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -147,7 +148,8 @@ const ProjectDetailPage: React.FC = () => {
         startDate: startDateObj.toISOString(),
         endDate: endDateObj.toISOString(),
         status,
-        priority
+        priority,
+        projectId: id,
       };
 
       if (isEditing && editingTask) {
@@ -323,47 +325,39 @@ const ProjectDetailPage: React.FC = () => {
 
   useEffect(() => {
     let isMounted = true;
-
     const fetchProjectDetails = async () => {
       if (!id || !token) {
-        if (isMounted) {
-          setLoading(false);
-        }
+        if (isMounted) setLoading(false);
         return;
       }
 
       try {
-        console.log('Fetching project details for ID:', id);
         const data = await getProjectById(id, token);
-
+        console.log('Project data received:', data);
         if (isMounted) {
           if (data) {
-            console.log('Project details received:', data);
             setProject(data);
-            setError(null);
           } else {
-            console.error('No project data returned');
-            setError('Project not found');
+            const local = cachedProjects.find(p => p.id === id);
+            if (local) setProject(local);
+            else setError('Projet non trouvé');
           }
         }
-      } catch (err) {
-        console.error('Error fetching project details:', err);
+      } catch {
         if (isMounted) {
-          setError('Failed to load project details');
+          const local = cachedProjects.find(p => p.id === id);
+          console.error('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+          if (local) setProject(local);
+          else setError('Impossible de charger le projet');
         }
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchProjectDetails();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [id, token]);
+    return () => { isMounted = false; };
+  }, [id, token, getProjectById, cachedProjects]);
 
   useEffect(() => {
     let isMounted = true;
@@ -381,7 +375,7 @@ const ProjectDetailPage: React.FC = () => {
       try {
         console.log('Fetching tasks for project:', id);
         const list = await getTasks(id, token);
-
+        console.log('Tasks fetched:', list);
         if (isMounted) {
           if (Array.isArray(list)) {
             console.log('Tasks received:', list);
@@ -426,6 +420,14 @@ const ProjectDetailPage: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
   if (!token) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex justify-center items-center">
@@ -443,18 +445,9 @@ const ProjectDetailPage: React.FC = () => {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex justify-center items-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600 mb-4 mx-auto"></div>
-          <p className="text-gray-600">Chargement du projet...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (error && !project) {
+    console.error('Error loading project:', error);
+    console.error('Project data:', project);
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex justify-center items-center">
         <div className="text-center bg-white p-8 rounded-xl shadow-lg max-w-md">

@@ -1,3 +1,6 @@
+import { useProjectStore } from '../store/projectStore';
+import { useTaskStore } from '../store/taskStore';
+
 export async function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open("offline-requests", 1);
@@ -12,10 +15,16 @@ export async function openDB(): Promise<IDBDatabase> {
   });
 }
 
-export async function storeOfflineRequest(url: string, body: string, method: string, headers: HeadersInit) {
+export async function storeOfflineRequest(
+  url: string,
+  body: string,
+  method: string,
+  headers: HeadersInit,
+  localId?: string
+) {
   const db = await openDB();
   const tx = db.transaction('requests', 'readwrite');
-  tx.objectStore('requests').add({ url, body, method, headers, timestamp: new Date().toISOString() });
+  tx.objectStore('requests').add({ url, body, method, headers, timestamp: new Date().toISOString(), localId });
 }
 
 export async function getOfflineRequests() {
@@ -44,7 +53,13 @@ export const purgeExpiredRequests = async () => {
       const request = cursor.value;
       if (now - new Date(request.timestamp).getTime() > expirationTime) {
         store.delete(request.id);
-        generateNotication(request.method, `La requête ${request.body.parse().title} a expiré.`);
+        // extract title from JSON body string
+        let title = "";
+        try {
+          const bodyObj = JSON.parse(request.body);
+          title = bodyObj.title || "";
+        } catch {}
+        generateNotication(request.method, `La requête ${title} a expiré.`);
       }
       cursor.continue();
     }
@@ -87,7 +102,13 @@ export async function syncOfflineRequests() {
     if (now - new Date(req.timestamp).getTime() > expirationTime) {
       const txDel = db.transaction("requests", "readwrite");
       txDel.objectStore("requests").delete(req.id);
-      generateNotication(req.method, `La requête ${req.body.parse().title} a expiré.`);
+      // extract title from JSON body string
+      let title = "";
+      try {
+        const bodyObj = JSON.parse(req.body);
+        title = bodyObj.title || "";
+      } catch {}
+      generateNotication(req.method, `La requête ${title} a expiré.`);
       await new Promise(resolve => { txDel.oncomplete = resolve; });
       continue;
     }
@@ -102,7 +123,39 @@ export async function syncOfflineRequests() {
       if (resp.ok) {
         const txDel = db.transaction("requests", "readwrite");
         txDel.objectStore("requests").delete(req.id);
-        generateNotication(req.method, `La requête ${req.body.parse().title} a été synchronisée.`);
+
+        // si c'est la création d'un project, remplacer le temp par le réel
+        if (req.method === 'POST' && req.url.includes('/projects')) {
+          const created = await resp.json();
+          const { removeProject, addProject } = useProjectStore.getState();
+          if (req.localId) removeProject(req.localId);
+          addProject(created);
+        }
+
+        if (req.method === 'POST' && req.url.includes('/tasks')) {
+          const created = await resp.json();
+          const { removeTask, addTask } = useTaskStore.getState();
+          if (req.localId) removeTask(req.localId);
+          addTask(created);
+        }
+        if (req.method === 'PUT' && req.url.includes('/tasks')) {
+          const created = await resp.json();
+          const { removeTask, addTask } = useTaskStore.getState();
+          if (req.localId) removeTask(req.localId);
+          addTask(created);
+        }
+        if (req.method === 'PUT' && req.url.includes('/projects')) {
+          const created = await resp.json();
+          const { removeProject, addProject } = useProjectStore.getState();
+          if (req.localId) removeProject(req.localId);
+          addProject(created);
+        }
+        if (req.method === 'DELETE' && req.url.includes('/projects')) {
+          const { removeProject } = useProjectStore.getState();
+          if (req.localId) removeProject(req.localId);
+        }
+
+        generateNotication(req.method, `La requête a été synchronisée.`);
         await new Promise(resolve => { txDel.oncomplete = resolve; });
       } else {
         console.error("Failed to sync request:", req, resp);

@@ -10,6 +10,7 @@ export interface Task {
   endDate: string;
   status: string;
   priority: string;
+  projectId?: string;
 }
 
 class TaskService {

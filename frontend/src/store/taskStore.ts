@@ -11,6 +11,7 @@ export type Task = {
   endDate: string;
   status: string;
   priority: string;
+  projectId?: string;
 }
 
 type TaskStore = {
@@ -29,7 +30,7 @@ type TaskStore = {
 
 export const useTaskStore = create<TaskStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       tasks: [],
       isHydrated: false,
       setHydrated: () => set({ isHydrated: true }),
@@ -48,14 +49,12 @@ export const useTaskStore = create<TaskStore>()(
         try {
           const data = await TaskService.getTasks(projectId, token);
           if (!data) {
-            console.error('Error fetching tasks:', data);
-            return undefined;
+            return get().tasks;
           }
           set({ tasks: data });
           return data;
         } catch (error) {
-          console.error('Error fetching tasks:', error);
-          return undefined;
+          return get().tasks;
         }
       },
 
