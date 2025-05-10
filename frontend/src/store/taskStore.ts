@@ -23,6 +23,7 @@ type TaskStore = {
   updateTask: (taskId: string, updatedTask: Partial<Task>) => void;
   clearTasks: () => void;
   getTasks: (projectId: string, token: string) => Promise<Task[] | undefined>;
+  getAllTasks: (token: string) => Promise<Task[] | undefined>;
   createTask: (projectId: string, taskData: Partial<Task>, token: string) => Promise<Task | undefined>;
   updateTaskService: (projectId: string, taskId: string, taskData: Partial<Task>, token: string) => Promise<Task>;
   deleteTask: (projectId: string, taskId: string, token: string) => Promise<void>;
@@ -58,18 +59,52 @@ export const useTaskStore = create<TaskStore>()(
         }
       },
 
+      getAllTasks: async (token) => {
+        try {
+          const data = await TaskService.getAllTasks(token);
+          if (!data) {
+            return get().tasks;
+          }
+          set({ tasks: data });
+          return data;
+        } catch (error) {
+          return get().tasks;
+        }
+      },
+
       createTask: async (projectId, taskData, token) => {
         try {
           const data = await TaskService.createTask(projectId, taskData, token);
-          if (!data) {
-            console.error('Error creating task:', data);
-            return undefined;
+          const offline: any = data
+          if (!data || offline?.offline === true) {
+            const newTask: Task = {
+              id: taskData.id || Date.now().toString(),
+              name: taskData.name || '',
+              description: taskData.description || '',
+              startDate: taskData.startDate || '',
+              endDate: taskData.endDate || '',
+              status: taskData.status || '',
+              priority: taskData.priority || '',
+              projectId,
+            };
+            set((state) => ({ tasks: [...state.tasks, newTask] }));
+            return newTask;
           }
           set((state) => ({ tasks: [...state.tasks, data] }));
           return data;
         } catch (error) {
-          console.error('Error creating task:', error);
-          return undefined;
+          const newTask: Task = {
+              id: taskData.id || Date.now().toString(),
+              name: taskData.name || '',
+              description: taskData.description || '',
+              startDate: taskData.startDate || '',
+              endDate: taskData.endDate || '',
+              status: taskData.status || '',
+              priority: taskData.priority || '',
+              projectId,
+            };
+            set((state) => ({ tasks: [...state.tasks, newTask] }));
+            return newTask;
         }
       },
 

@@ -17,6 +17,7 @@ export class Routes {
 
   // TASKS
   static readonly GET_TASKS = `${Routes.GET_PROJECT_BY_ID}/tasks`;
+  static readonly GET_ALL_TASKS = `${Routes.GET_PROJECTS}/all`;
   static readonly CREATE_TASK = `${Routes.GET_PROJECT_BY_ID}/tasks`;
   static readonly GET_TASK_BY_ID = (taskId: string) => `${Routes.GET_TASKS}/${taskId}`;
   static readonly UPDATE_TASK = (taskId: string) => `${Routes.GET_TASKS}/${taskId}`;

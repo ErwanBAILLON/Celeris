@@ -34,6 +34,26 @@ class TaskService {
     }
   }
 
+  async getAllTasks(token: string): Promise<Task[] | undefined> {
+    try {
+      const url = `${Routes.GET_ALL_TASKS}`;
+      const response = await fetchWithOfflineSupport(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+      const data: Task[] = await response.json();
+      return data.map((task: Task) => ({
+        ...task,
+        startDate: new Date(task.startDate).toISOString(),
+        endDate: new Date(task.endDate).toISOString(),
+      }));
+    } catch (error) {
+      console.error('Error fetching all tasks:', error);
+    }
+  }
+
   async createTask(projectId: string, taskData: Partial<Task>, token: string): Promise<Task | undefined> {
     try {
       const url = `${Routes.GET_PROJECT_BY_ID(projectId)}/tasks`;

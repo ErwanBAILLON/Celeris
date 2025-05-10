@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
 import { useProjectStore } from '../store/projectStore';
 import { syncOfflineRequests } from '../utils/offlineRequests';
+import { useTaskStore } from '../store/taskStore';
 
 interface Project { id: string; name: string; }
 
@@ -12,6 +13,7 @@ const ProjectsPage: React.FC = () => {
   const token = useUserStore(state => state.user.accessToken);
 
   const getProjects = useProjectStore(state => state.getProjects);
+  const getAllTasks = useTaskStore(state => state.getAllTasks);
   const deleteProject = useProjectStore(state => state.deleteProject);
   const updateProject = useProjectStore(state => state.updateProjectService);
   const storedProjects = useProjectStore.getState().projects;
@@ -140,6 +142,7 @@ const ProjectsPage: React.FC = () => {
 
       try {
         const resp = await getProjects(token);
+        await getAllTasks(token);
 
         if (isMounted) {
           if (Array.isArray(resp)) {
