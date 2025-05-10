@@ -37,11 +37,11 @@ export const useTaskStore = create<TaskStore>()(
       setHydrated: () => set({ isHydrated: true }),
 
       addTask: (task) => set((state) => ({ tasks: [...state.tasks, task] })),
-      removeTask: (taskId) => set((state) => ({ tasks: state.tasks.filter((task) => task.id !== taskId) })),
+      removeTask: (taskId) => set((state) => ({ tasks: state.tasks.filter((task) => String(task.id) !== taskId) })),
       updateTask: (taskId, updatedTask) =>
         set((state) => ({
           tasks: state.tasks.map((task) =>
-            task.id === taskId ? { ...task, ...updatedTask } : task
+            String(task.id) === taskId ? { ...task, ...updatedTask } : task
           ),
         })),
       clearTasks: () => set({ tasks: [] }),
@@ -50,12 +50,12 @@ export const useTaskStore = create<TaskStore>()(
         try {
           const data = await TaskService.getTasks(projectId, token);
           if (!data) {
-            return get().tasks;
+            return get().tasks.filter((task) => String(task.projectId) === projectId);
           }
           set({ tasks: data });
           return data;
         } catch (error) {
-          return get().tasks;
+          return get().tasks.filter((task) => String(task.projectId) === projectId);
         }
       },
 
@@ -116,7 +116,7 @@ export const useTaskStore = create<TaskStore>()(
           }
           set((state) => ({
             tasks: state.tasks.map((task) =>
-              task.id === taskId ? { ...task, ...data } : task
+              String(task.id) === taskId ? { ...task, ...data } : task
             ),
           }));
           return data;
@@ -129,7 +129,7 @@ export const useTaskStore = create<TaskStore>()(
       deleteTask: async (projectId, taskId, token) => {
         try {
           await TaskService.deleteTask(projectId, taskId, token);
-          set((state) => ({ tasks: state.tasks.filter((task) => task.id !== taskId) }));
+          set((state) => ({ tasks: state.tasks.filter((task) => String(task.id) !== taskId) }));
         } catch (error) {
           console.error('Error deleting task:', error);
         }
