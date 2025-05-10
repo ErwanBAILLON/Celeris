@@ -153,10 +153,8 @@ const ProjectDetailPage: React.FC = () => {
       };
 
       if (isEditing && editingTask) {
-        console.log('Updating task:', payload);
         try {
           const updated = await updateTask(id, editingTask.id, payload, token);
-          console.log('Server response after update:', updated);
 
           // Mise à jour optimiste de l'interface avec une approche plus défensive
           setTasks(prev => {
@@ -166,7 +164,6 @@ const ProjectDetailPage: React.FC = () => {
                 ...payload,
                 id: editingTask.id // Conserver l'ID original
               } : t);
-              console.log('Tasks updated after edit:', newTasks);
               return newTasks;
             } catch (error) {
               console.error('Error updating tasks array:', error);
@@ -178,10 +175,8 @@ const ProjectDetailPage: React.FC = () => {
           throw updateError;
         }
       } else {
-        console.log('Creating new task:', payload);
         try {
           const newTask = await createTask(id, payload, token);
-          console.log('Server response for new task:', newTask);
 
           // Création d'un objet tâche compatible avec notre interface, indépendamment de la réponse du serveur
           const formattedTask: Task = {
@@ -195,13 +190,11 @@ const ProjectDetailPage: React.FC = () => {
             // Ajoutez d'autres propriétés requises par l'interface Task ici avec des valeurs par défaut
           };
 
-          console.log('Formatted task to add to UI:', formattedTask);
 
           // Ajouter la nouvelle tâche au state
           setTasks(prev => {
             try {
               const newTasks = [...prev, formattedTask];
-              console.log('Tasks state after adding:', newTasks);
               return newTasks;
             } catch (error) {
               console.error('Error adding to tasks array:', error);
@@ -261,7 +254,6 @@ const ProjectDetailPage: React.FC = () => {
   };
 
   const calculateTasksByDate = (taskList: Task[]): Record<string, Task[]> => {
-    console.log('Calculating tasks by date with tasks:', taskList);
 
     if (!Array.isArray(taskList)) {
       console.error('Invalid taskList, not an array:', taskList);
@@ -320,7 +312,6 @@ const ProjectDetailPage: React.FC = () => {
   const tasksByDate = calculateTasksByDate(tasks);
 
   useEffect(() => {
-    console.log('Tasks state updated:', tasks);
   }, [tasks]);
 
   useEffect(() => {
@@ -333,7 +324,6 @@ const ProjectDetailPage: React.FC = () => {
 
       try {
         const data = await getProjectById(id, token);
-        console.log('Project data received:', data);
         if (isMounted) {
           if (data) {
             setProject(data);
@@ -373,12 +363,9 @@ const ProjectDetailPage: React.FC = () => {
       setTaskLoading(true);
 
       try {
-        console.log('Fetching tasks for project:', id);
         const list = await getTasks(id, token);
-        console.log('Tasks fetched:', list);
         if (isMounted) {
           if (Array.isArray(list)) {
-            console.log('Tasks received:', list);
             setTasks(list);
           } else {
             console.error('Invalid tasks data format:', list);
