@@ -45,7 +45,7 @@ export const purgeExpiredRequests = async () => {
   const tx = db.transaction("requests", "readwrite");
   const store = tx.objectStore("requests");
   const now = Date.now();
-  const expirationTime = 24 * 60 * 60 * 1000; // 1 day in ms
+  const expirationTime = 60 * 1000; // 1 day in ms
   const req = store.openCursor();
   req.onsuccess = () => {
     const cursor = req.result;
@@ -83,7 +83,7 @@ const generateNotication = (method: 'GET' | 'POST' | 'PUT' | 'DELETE', message: 
 
 export async function syncOfflineRequests() {
   if (!navigator.onLine) return;
-  const expirationTime = 24 * 60 * 60 * 1000; // 1 day in ms
+  const expirationTime =  60 * 1000; // 1 day in ms
   const now = Date.now();
   const db = await openDB();
 

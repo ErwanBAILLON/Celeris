@@ -218,7 +218,7 @@ const Header: React.FC = () => {
   const unreadCount = reminders.filter(r => !r.completed).length;
 
   return (
-    <header className="bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-md">
+    <header className="bg-gradient-to-r from-red-700 to-blue-600 text-white shadow-md">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <Link to="/home" className="text-2xl font-bold flex items-center">

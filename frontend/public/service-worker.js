@@ -1,4 +1,4 @@
-const CURRENT_VERSION = '1.0.1'; // Incrémentez cette version lors des mises à jour
+const CURRENT_VERSION = '1.0.2'; // Incrémentez cette version lors des mises à jour
 
 self.addEventListener('install', event => {
   console.log(`[SW v${CURRENT_VERSION}] Installing.`);
