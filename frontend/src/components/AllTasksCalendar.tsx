@@ -4,8 +4,8 @@ import { EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import TaskService from '../services/task/taskService';
 import { useProjectStore } from '../store/projectStore';
+import { useTaskStore } from '../store/taskStore';
 
 interface AllTasksCalendarProps {
   token: string;
@@ -13,17 +13,14 @@ interface AllTasksCalendarProps {
 
 const AllTasksCalendar: React.FC<AllTasksCalendarProps> = ({ token }) => {
   const { projects, isHydrated: projHydrated } = useProjectStore();
+  const { tasks } = useTaskStore();
   const [events, setEvents] = useState<EventInput[]>([]);
 
   useEffect(() => {
     if (!projHydrated) return;
     (async () => {
       try {
-        const tasksArrays = await Promise.all(
-          projects.map(p =>
-            TaskService.getTasks(p.id, token).catch(() => [])
-          )
-        );
+        const tasksArrays = tasks;
         const allTasks = tasksArrays.flat().filter(task => task !== undefined);
         setEvents(
           allTasks.map(task => ({

@@ -34,7 +34,7 @@ export const useProjectStore = create<ProjectStore>()(
       setHydrated: () => set({ isHydrated: true }),
 
       addProject: (project) => set((state) => ({ projects: [...state.projects, project] })),
-      removeProject: (projectId) => set((state) => ({ projects: state.projects.filter((project) => project.id !== projectId) })),
+      removeProject: (projectId) => set((state) => ({ projects: state.projects.filter((project) => String(project.id) !== String(projectId)) })),
       updateProject: (projectId, updatedProject) =>
         set((state) => ({
           projects: state.projects.map((project) =>
