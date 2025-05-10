@@ -25,7 +25,7 @@ type TaskStore = {
   getTasks: (projectId: string, token: string) => Promise<Task[] | undefined>;
   getAllTasks: (token: string) => Promise<Task[] | undefined>;
   createTask: (projectId: string, taskData: Partial<Task>, token: string) => Promise<Task | undefined>;
-  updateTaskService: (projectId: string, taskId: string, taskData: Partial<Task>, token: string) => Promise<Task>;
+  updateTaskService: (projectId: string, taskId: string, taskData: Partial<Task>, token: string) => Promise<Task | undefined>;
   deleteTask: (projectId: string, taskId: string, token: string) => Promise<void>;
 };
 
@@ -111,12 +111,26 @@ export const useTaskStore = create<TaskStore>()(
       updateTaskService: async (projectId, taskId, taskData, token) => {
         try {
           const data = await TaskService.updateTask(projectId, taskId, taskData, token);
-          if (!data) {
-            throw new Error('Error updating task: Task data is undefined');
+          const offline: any = data;
+          if (!data || offline?.offline === true) {
+            const existingTask = get().tasks.find((task) => String(task.id) === String(taskId));
+            if (existingTask) {
+              const updatedTask: Task = {
+                ...existingTask,
+                ...taskData,
+              };
+              set((state) => ({
+                tasks: state.tasks.map((task) =>
+                  String(task.id) === String(taskId) ? updatedTask : task
+                ),
+              }));
+              return updatedTask;
+            }
+            return undefined;
           }
           set((state) => ({
             tasks: state.tasks.map((task) =>
-              String(task.id) === taskId ? { ...task, ...data } : task
+              String(task.id) === String(taskId) ? { ...task, ...data } : task
             ),
           }));
           return data;
